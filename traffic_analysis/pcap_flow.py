@@ -31,9 +31,9 @@ class Flow(object):
                 # write your code here
                 if ip.proto != IPPROTO_TCP:
                     continue
-                packet_length = ip.len + ip.ihl * 4
                 source_ip_int = int(ip_address(ip.src))
                 destination_ip_int = int(ip_address(ip.dst))
+                packet_length = ip.len + ip.ihl * 4
             else:
                 continue
 
