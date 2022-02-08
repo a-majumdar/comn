@@ -33,7 +33,7 @@ class Flow(object):
                     continue
                 source_ip_int = int(ip_address(ip.src))
                 destination_ip_int = int(ip_address(ip.dst))
-                packet_length = ip.len + ip.ihl * 4
+                packet_length = ip.len - ip.ihl * 4
             else:
                 continue
 
