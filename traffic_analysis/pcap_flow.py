@@ -21,9 +21,9 @@ class Flow(object):
                 # write your code here
                 if ip.nh != IPPROTO_TCP:
                     continue
-                plen = ip.plen
-                sip = int(IPv6Address(ip.src))
-                dip = int(IPv6Address(ip.dst))
+                source_ip_int = int(IPv6Address(ip.src))
+                destination_ip_int = int(IPv6Address(ip.dst))
+                packet_length = ip.plen
                 #
             elif ether.type == 0x0800:
                 ip = ether[IP]
@@ -31,9 +31,9 @@ class Flow(object):
                 # write your code here
                 if ip.proto != IPPROTO_TCP:
                     continue
-                plen = ip.len + ip.ihl * 4
-                sip = int(ip_address(ip.src))
-                dip = int(ip_address(ip.dst))
+                packet_length = ip.len + ip.ihl * 4
+                source_ip_int = int(ip_address(ip.src))
+                destination_ip_int = int(ip_address(ip.dst))
 
             if not ip.haslayer(TCP):
                 continue
@@ -41,17 +41,17 @@ class Flow(object):
             tcp = ip[TCP]
             #
             # write your code here
-            plen -= tcp.dataofs * 4
-            if plen == 0:
+            packet_length -= tcp.dataofs * 4
+            if packet_length == 0:
                 continue
-            tcpflow = (sip, dip, tcp.sport, tcp.dport)
-            rflow = (dip, sip, tcp.dport, tcp.sport)
+            tcpflow = (source_ip_int, destination_ip_int, tcp.sport, tcp.dport)
+            rflow = (destination_ip_int, source_ip_int, tcp.dport, tcp.sport)
             if tcpflow in self.ft:
-                self.ft[tcpflow] += plen
+                self.ft[tcpflow] += packet_length
             elif rflow in self.ft:
-                self.ft[rflow] += plen
+                self.ft[rflow] += packet_length
             else:
-                self.ft[tcpflow] = plen
+                self.ft[tcpflow] = packet_length
             #
     def Plot(self):
         topn = 100
