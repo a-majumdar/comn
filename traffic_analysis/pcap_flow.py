@@ -34,6 +34,8 @@ class Flow(object):
                 packet_length = ip.len + ip.ihl * 4
                 source_ip_int = int(ip_address(ip.src))
                 destination_ip_int = int(ip_address(ip.dst))
+            else:
+                continue
 
             if not ip.haslayer(TCP):
                 continue
