@@ -31,6 +31,7 @@ class Node(object):
                     self.right.add(ip, plen)
             elif self.ip == ip:
                 self.bytes += plen
+                added = True
         #
 
     def data(self, data):
