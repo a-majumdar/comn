@@ -62,7 +62,7 @@ class Node(object):
             self.left.aggr(byte_thresh)
             if self.left.bytes < byte_thresh:
                 self.bytes += self.left.bytes
-                if self.left.left || self.left.right:
+                if self.left.left or self.left.right:
                     self.left.bytes = 0
                 else:
                     self.ip = supernet(self.ip, self.left.ip)
