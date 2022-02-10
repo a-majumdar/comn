@@ -28,7 +28,7 @@ class Node(object):
                 else:
                     self.add(self.right, ip, plen)
             elif self.ip == ip:
-                self.bytes += plen 
+                self.bytes += plen
         #
 
     def data(self, data):
@@ -52,7 +52,9 @@ class Node(object):
     def aggr(self, byte_thresh):
         #
         # write your code here
+        pass
         #
+
 
 class Data(object):
     def __init__(self, data):
