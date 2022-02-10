@@ -46,7 +46,7 @@ class Node(object):
         # write your code here
         prefix_length = 32 - (int(na1) ^ int(na2)).bit_length()
         binary_network_address = ''.join(["{0:08b}".format(int(x)) for x in str(na2).split('.')])
-        supernet_address = ip_address(int(binary_network_address[:prefixlen].ljust(32, '0'), 2))
+        supernet_address = ip_address(int(binary_network_address[:prefix_length].ljust(32, '0'), 2))
         return ip_network("{}/{}".format(supernet_address, prefix_length), strict=False)
         #
         return ip_network('{}/{}'.format(na1, netmask), strict=False)
