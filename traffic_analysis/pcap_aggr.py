@@ -15,26 +15,18 @@ class Node(object):
     def add(self, ip, plen):
         #
         # write your code here
-        added = False
-        while not added:
-            if int(ip) < int(self.ip):
-                if self.left is None:
-                    self.left = Node(ip, plen)
-                    added = True
-                    print("left")
-                else:
-                    self.left.add(ip, plen)
-            elif int(self.ip) < int(ip):
-                if self.right is None:
-                    self.right = Node(ip, plen)
-                    added = True
-                    print("right")
-                else:
-                    self.right.add(ip, plen)
-            elif int(self.ip) == int(ip):
-                self.bytes += plen
-                added = True
-                print("bytes")
+        if int(ip) < int(self.ip):
+            if self.left is None:
+                self.left = Node(ip, plen)
+            else:
+                self.left.add(ip, plen)
+        elif int(self.ip) < int(ip):
+            if self.right is None:
+                self.right = Node(ip, plen)
+            else:
+                self.right.add(ip, plen)
+        elif int(self.ip) == int(ip):
+            self.bytes += plen
         #
 
     def data(self, data):
