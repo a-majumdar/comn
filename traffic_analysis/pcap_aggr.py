@@ -15,18 +15,20 @@ class Node(object):
     def add(self, ip, plen):
         #
         # write your code here
-        adding = False
-        while not adding:
+        added = False
+        while not added:
             if ip < self.ip:
                 if self.left == None:
                     self.left = Node(ip, plen)
+                    added = True
                 else:
-                    self.add(self.left, ip, plen)
+                    self.left.add(ip, plen)
             elif self.ip < ip:
                 if self.right == None:
                     self.right = Node(ip, plen)
+                    added = True
                 else:
-                    self.add(self.right, ip, plen)
+                    self.right.add(ip, plen)
             elif self.ip == ip:
                 self.bytes += plen
         #
