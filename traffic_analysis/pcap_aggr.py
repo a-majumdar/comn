@@ -15,18 +15,21 @@ class Node(object):
     def add(self, ip, plen):
         #
         # write your code here
-        if int(ip) < int(self.ip):
+        if ip < self.ip:
             if self.left is None:
                 self.left = Node(ip, plen)
+                print("left")
             else:
                 self.left.add(ip, plen)
-        elif int(self.ip) < int(ip):
+        elif self.ip < ip:
             if self.right is None:
                 self.right = Node(ip, plen)
+                print("right")
             else:
                 self.right.add(ip, plen)
-        elif int(self.ip) == int(ip):
+        elif self.ip == ip:
             self.bytes += plen
+            print("bytes")
         #
 
     def data(self, data):
@@ -44,13 +47,35 @@ class Node(object):
         na2 = ip_network(ip2).network_address
         #
         # write your code here
+        if not na2.subnet_of(na1):
+            prefix_length = 32 - (int(na1) ^ int(na2)).bit_length()
+            binary_network_address = ''.join(["{0:08b}".format(int(x)) for x in str(na2).split('.')])
+            supernet_address = ip_address(int(binary_network_address[:prefixlen].ljust(32, '0'), 2))
+            return ip_network("{}/{}".format(supernet_address, prefix_length), strict=False)
         #
         return ip_network('{}/{}'.format(na1, netmask), strict=False)
 
     def aggr(self, byte_thresh):
         #
         # write your code here
-        pass
+        if self.left:
+            self.left.aggr(byte_thresh)
+            if self.left.bytes < byte_thresh:
+                self.bytes += self.left.bytes
+                if self.left.left || self.left.right:
+                    self.left.bytes = 0
+                else:
+                    self.ip = supernet(self.ip, self.left.ip)
+                    self.left = None
+        if self.right:
+            self.right.aggr(byte_thresh)
+            if self.right.bytes < byte_thresh:
+                self.bytes += self.right.bytes
+                if self.right.left || self.right.left:
+                    self.right.bytes = 0
+                else:
+                    self.ip = supernet(self.ip, self.right.ip)
+                    self.right = None
         #
 
 
