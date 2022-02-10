@@ -17,21 +17,21 @@ class Node(object):
         # write your code here
         added = False
         while not added:
-            if ip < self.ip:
-                if self.left == None:
+            if int(ip) < int(self.ip):
+                if self.left is None:
                     self.left = Node(ip, plen)
                     added = True
                     print("left")
                 else:
                     self.left.add(ip, plen)
-            elif self.ip < ip:
-                if self.right == None:
+            elif int(self.ip) < int(ip):
+                if self.right is None:
                     self.right = Node(ip, plen)
                     added = True
                     print("right")
                 else:
                     self.right.add(ip, plen)
-            elif self.ip == ip:
+            elif int(self.ip) == int(ip):
                 self.bytes += plen
                 added = True
                 print("bytes")
