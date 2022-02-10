@@ -21,17 +21,20 @@ class Node(object):
                 if self.left == None:
                     self.left = Node(ip, plen)
                     added = True
+                    print("left")
                 else:
                     self.left.add(ip, plen)
             elif self.ip < ip:
                 if self.right == None:
                     self.right = Node(ip, plen)
                     added = True
+                    print("right")
                 else:
                     self.right.add(ip, plen)
             elif self.ip == ip:
                 self.bytes += plen
                 added = True
+                print("bytes")
         #
 
     def data(self, data):
