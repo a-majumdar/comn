@@ -22,6 +22,7 @@ class Node(object):
                 self.left.add(ip, plen)
         elif self.ip < ip:
             if self.right is None:
+                self.right = Node(ip, plen)
             else:
                 self.right.add(ip, plen)
         elif self.ip == ip:
