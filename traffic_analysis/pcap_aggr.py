@@ -44,7 +44,7 @@ class Node(object):
         na2 = ip_network(ip2).network_address
         #
         # write your code here
-        if not na2.subnet_of(na1):
+        if not ip2.subnet_of(ip1):
             prefix_length = 32 - (int(na1) ^ int(na2)).bit_length()
             binary_network_address = ''.join(["{0:08b}".format(int(x)) for x in str(na2).split('.')])
             supernet_address = ip_address(int(binary_network_address[:prefixlen].ljust(32, '0'), 2))
