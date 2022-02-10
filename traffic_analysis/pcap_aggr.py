@@ -11,10 +11,26 @@ class Node(object):
         self.left = None
         self.right = None
         self.ip = ip
+
     def add(self, ip, plen):
         #
         # write your code here
+        adding = False
+        while not adding:
+            if ip < self.ip:
+                if self.left == None:
+                    self.left = Node(ip, plen)
+                else:
+                    self.add(self.left, ip, plen)
+            elif self.ip < ip:
+                if self.right == None:
+                    self.right = Node(ip, plen)
+                else:
+                    self.add(self.right, ip, plen)
+            elif self.ip == ip:
+                self.bytes += plen 
         #
+
     def data(self, data):
         if self.left:
             self.left.data(data)
@@ -22,7 +38,8 @@ class Node(object):
             data[ip_network(self.ip)] = self.bytes
         if self.right:
             self.right.data(data)
-    @staticmethod 
+
+    @staticmethod
     def supernet(ip1, ip2):
         # arguments are either IPv4Address or IPv4Network
         na1 = ip_network(ip1).network_address
@@ -31,11 +48,12 @@ class Node(object):
         # write your code here
         #
         return ip_network('{}/{}'.format(na1, netmask), strict=False)
+
     def aggr(self, byte_thresh):
         #
         # write your code here
         #
-            
+
 class Data(object):
     def __init__(self, data):
         self.tot_bytes = 0
@@ -58,6 +76,7 @@ class Data(object):
             cnt += 1
         root.aggr(self.tot_bytes * self.aggr_ratio)
         root.data(self.data)
+
     def Plot(self):
         data = {k: v/1000 for k, v in self.data.items()}
         plt.rcParams['font.size'] = 8
@@ -74,6 +93,7 @@ class Data(object):
             self.aggr_ratio * 100, self.tot_bytes * self.aggr_ratio / 1000))
         plt.savefig(sys.argv[1] + '.aggr.pdf', bbox_inches='tight')
         plt.close()
+
     def _Dump(self):
         with open(sys.argv[1] + '.aggr.data', 'w') as f:
             f.write('{}'.format({str(k): v for k, v in self.data.items()}))

@@ -55,6 +55,7 @@ class Flow(object):
             else:
                 self.ft[tcpflow] = packet_length
             #
+            
     def Plot(self):
         topn = 100
         data = [i/1000 for i in list(self.ft.values())]
@@ -68,6 +69,7 @@ class Flow(object):
         ax.set_title('Top {} TCP flow size distribution.'.format(topn))
         plt.savefig(sys.argv[1] + '.flow.pdf', bbox_inches='tight')
         plt.close()
+
     def _Dump(self):
         with open(sys.argv[1] + '.flow.data', 'w') as f:
             f.write('{}'.format(self.ft))
