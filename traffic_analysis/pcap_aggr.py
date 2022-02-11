@@ -44,10 +44,12 @@ class Node(object):
         na2 = ip_network(ip2).network_address
         #
         # write your code here
-        prefix_length = 32 - (int(na1) ^ int(na2)).bit_length()
-        binary_network_address = ''.join(["{0:08b}".format(int(x)) for x in str(na2).split('.')])
-        supernet_address = ip_address(int(binary_network_address[:prefix_length].ljust(32, '0'), 2))
-        return ip_network("{}/{}".format(supernet_address, prefix_length), strict=False)
+        suffix = (int(na1) ^ int(na2)).bit_length()
+        netmask = 32 - suffix
+        na2_split = str(na2).split('.')
+        binary_network_address = ''.join(["{0:08b}".format(int(x)) for x in na2_split])
+        supernet_address = ip_address(int(binary_network_address[:netmask].ljust(32, '0'), 2))
+        return ip_network("{}/{}".format(supernet_address, netmask), strict=False)
         #
         return ip_network('{}/{}'.format(na1, netmask), strict=False)
 
@@ -58,19 +60,19 @@ class Node(object):
             self.left.aggr(byte_thresh)
             if self.left.bytes < byte_thresh:
                 self.bytes += self.left.bytes
+                self.ip = self.supernet(self.ip, self.left.ip)
                 if self.left.left or self.left.right:
                     self.left.bytes = 0
                 else:
-                    self.ip = self.supernet(self.ip, self.left.ip)
                     self.left = None
         if self.right:
             self.right.aggr(byte_thresh)
             if self.right.bytes < byte_thresh:
                 self.bytes += self.right.bytes
+                self.ip = self.supernet(self.ip, self.right.ip)
                 if self.right.left or self.right.left:
                     self.right.bytes = 0
                 else:
-                    self.ip = self.supernet(self.ip, self.right.ip)
                     self.right = None
         #
 
