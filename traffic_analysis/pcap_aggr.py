@@ -44,12 +44,14 @@ class Node(object):
         na2 = ip_network(ip2).network_address
         #
         # write your code here
-        suffix = (int(na1) ^ int(na2)).bit_length()
-        netmask = 32 - suffix
-        na2_split = str(na2).split('.')
-        binary_network_address = ''.join(["{0:08b}".format(int(x)) for x in na2_split])
-        supernet_address = ip_address(int(binary_network_address[:netmask].ljust(32, '0'), 2))
-        na1 = supernet_address
+        prefixlen = 32-(int(na1)^int(na2)).bit_length()
+        # Find the binary string respsentation of the network address of one of the network addresses.
+        na_binary = ''.join(["{0:08b}".format(int(x)) for x in str(na2).split('.')])
+        # Find the address of the supernet by only keeping the first prefixlen number of bits.
+        supernet_address = ip_address(int(na_binary[:prefixlen].ljust(32, '0'), 2))
+        # Format the ip address correctly with its prefix length.
+        return ip_network("{}/{}".format(supernet_address, prefixlen), strict=False)
+
         #
         return ip_network('{}/{}'.format(na1, netmask), strict=False)
 
