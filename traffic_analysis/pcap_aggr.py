@@ -55,7 +55,7 @@ class Node(object):
     def aggr(self, byte_thresh):
         #
         # write your code here
-        if self.left is not None:
+        if not self.left is None:
             self.left.aggr(byte_thresh)
             if self.left.bytes < byte_thresh:
                 self.bytes += self.left.bytes
@@ -64,7 +64,8 @@ class Node(object):
                     self.left = None
                 else:
                     self.left.bytes = 0
-        if self.right is not None:
+                    
+        if not self.right is None:
             self.right.aggr(byte_thresh)
             if self.right.bytes < byte_thresh:
                 self.bytes += self.right.bytes
