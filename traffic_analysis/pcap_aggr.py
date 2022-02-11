@@ -58,21 +58,21 @@ class Node(object):
     def aggr(self, byte_thresh):
         #
         # write your code here
-        if self.left:
+        if self.left is not None:
             self.left.aggr(byte_thresh)
             if self.left.bytes < byte_thresh:
                 self.bytes += self.left.bytes
-                self.ip = self.supernet(self.ip, self.left.ip)
                 self.left.bytes = 0
+                self.ip = self.supernet(self.ip, self.left.ip)
                 if self.left.left is None and self.left.right is None:
                     self.left = None
-        if self.right:
+        if self.right is not None:
             self.right.aggr(byte_thresh)
             if self.right.bytes < byte_thresh:
                 self.bytes += self.right.bytes
-                self.ip = self.supernet(self.ip, self.right.ip)
                 self.right.bytes = 0
-                if self.right.left is None and self.right.left is None:
+                self.ip = self.supernet(self.ip, self.right.ip)
+                if self.right.left is None and self.right.right is None:
                     self.right = None
         #
 
