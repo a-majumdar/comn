@@ -5,9 +5,9 @@ packet_length = 1027
 
 def main(args):
 
-    sender_address = args[0]
-    port = int(args[1])
-    filename = args[2]
+    sender_address = args[1]
+    port = int(args[2])
+    filename = args[3]
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(("0.0.0.0", port))#bind to all interfaces

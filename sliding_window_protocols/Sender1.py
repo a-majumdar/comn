@@ -6,9 +6,10 @@ header_length = 3
 
 def main(argv):
 
-    receiver_address = argv[0]
-    receiver_port = int(argv[1])
-    filename = argv[2].encode('utf-8')
+    # argument vector starts from 0 but that includes the name of the script running, so the arguments used here start from argv[1]
+    receiver_address = argv[1]
+    receiver_port = int(argv[2])
+    filename = argv[3].encode('utf-8')
 
     #set up socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
