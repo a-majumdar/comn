@@ -1,13 +1,12 @@
 import socket
 import sys
-import select
 
 packet_length = 1027
 
 def main(args):
 
-    remote_host = args[0]
-    port = int (args[1])
+    sender_address = args[0]
+    port = int(args[1])
     filename = args[2]
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -16,17 +15,15 @@ def main(args):
 
     #open filename for writing to
     f = open(filename, 'wb+')
-    recv = sock.recvfrom(packet_length)
+    received = sock.recvfrom(packet_length)
 
-    while recv: # while there is data in the socket, keep recieving it
+    while received: # while there is data in the socket, keep recieving it
+        buffer = received[0]#receive data into buffer
+        buffer = bytearray(buffer)#cast data into byte array
 
-
-        r_buf = recv[0]#recieve data into buffer
-        r_buf = bytearray(r_buf)#cast data into byte array
-
-        seq = r_buf[0:2] # sequence number
-        eof = r_buf[2]
-        payload = r_buf[3:]
+        seq = buffer[0:2] # sequence number
+        eof = buffer[2]
+        payload = buffer[3:]
 
         seq = int.from_bytes(seq, byteorder="big")
 
@@ -38,8 +35,10 @@ def main(args):
 
         f.write(payload)
 
-        #recieve next payload
-        recv = sock.recvfrom(packet_length)
+        #receive next payload
+        received = sock.recvfrom(packet_length)
+
+    sock.close()
 
 
 if __name__ == "__main__":
