@@ -41,5 +41,24 @@ def main(argv):
     sock.close()
 
 
+def rdt_send():
+    pass
+
+def rdt_rcv():
+    pass
+
+def corrupt():
+    pass
+
+def isACK():
+    pass
+
+def timeout():
+    pass
+
+def notcorrupt():
+    pass
+
+
 if __name__ == "__main__":
     main(sys.argv)
