@@ -17,6 +17,8 @@ def main(argv):
 
     f = open(filename, 'rb')
     read_buffer = f.read(payload_length)
+
+    
     i = 0
     while (read_buffer):
         seq = i.to_bytes(2, byteorder='big')#first 2 bytes for sequence number

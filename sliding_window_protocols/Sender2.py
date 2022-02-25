@@ -1,5 +1,7 @@
 import socket
 import sys
+import time
+import select
 
 payload_length = 1024
 header_length = 3
@@ -10,6 +12,13 @@ def main(argv):
     receiver_address = argv[1]
     receiver_port = int(argv[2])
     filename = argv[3].encode('utf-8')
+    retry_timeout = int(argv[4])
+
+    # to track performance properties
+    total = 0
+    retry_count = 0
+    file_size = 0
+
 
     #set up socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -17,11 +26,14 @@ def main(argv):
 
     f = open(filename, 'rb')
     read_buffer = f.read(payload_length)
+
+    # start = time.time()
+
     i = 0
     while (read_buffer):
+
         seq = i.to_bytes(2, byteorder='big')#first 2 bytes for sequence number
         eof = (0).to_bytes(1, byteorder='big')#3rd byte for EOF
-
 
         if (len(read_buffer) < payload_length):
             print("End of file reached")
@@ -31,7 +43,16 @@ def main(argv):
         buffer[0:0] = seq
         buffer[2:2] = eof
         buffer[3:3] =  bytearray(read_buffer)
+
+        total += 1
+
         sock.sendto(buffer, (receiver_address, receiver_port))
+
+        t = timer()
+
+        flag = True
+        while flag:
+
 
         #remember to update read buffer and sequence number
         read_buffer = f.read(payload_length)
