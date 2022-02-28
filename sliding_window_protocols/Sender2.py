@@ -6,6 +6,11 @@ import select
 payload_length = 1024
 header_length = 3
 
+def timer():
+    start = round(time.time() * 1000)
+    while True:
+        yield round(time.time() * 1000) - start
+
 def main(argv):
 
     # argument vector starts from 0 but that includes the name of the script running, so the arguments used here start from argv[1]
@@ -28,7 +33,8 @@ def main(argv):
 
     start = time.time()
 
-    total, i = 0
+    total = 0
+    i = 0
     while (read_buffer):
 
         seq = i.to_bytes(2, byteorder='big')#first 2 bytes for sequence number
@@ -51,7 +57,20 @@ def main(argv):
 
         flag = True
         while flag:
-            pass
+            ready = select.select([sock], timeout=0)
+            if ready:
+                read_buffer = ready[0].recvfrom(2)
+                ack = read_buffer[0]
+                if seq == ack:
+                    break
+                else:
+                    continue
+            else:
+                duration = next(t)
+                if (duration >= retry_timeout):
+                    retry_count += 1
+                    # total += 1
+                    continue
 
         #remember to update read buffer and sequence number
         file_size += len(read_buffer)
@@ -60,7 +79,7 @@ def main(argv):
 
 
     time_taken = time.time() - start
-    print("".format(retries, round((file_size/time_taken)/1000)))
+    print("{} {}".format(retry_count, round((file_size/time_taken)/1000)))
 
     f.close()
     sock.close()
