@@ -15,9 +15,8 @@ def main(argv):
     retry_timeout = int(argv[4])
 
     # to track performance properties
-    total = 0
-    retry_count = 0
     file_size = 0
+    retry_count = 0
 
 
     #set up socket
@@ -27,9 +26,9 @@ def main(argv):
     f = open(filename, 'rb')
     read_buffer = f.read(payload_length)
 
-    # start = time.time()
+    start = time.time()
 
-    i = 0
+    total, i = 0
     while (read_buffer):
 
         seq = i.to_bytes(2, byteorder='big')#first 2 bytes for sequence number
@@ -52,11 +51,16 @@ def main(argv):
 
         flag = True
         while flag:
-
+            pass
 
         #remember to update read buffer and sequence number
+        file_size += len(read_buffer)
         read_buffer = f.read(payload_length)
         i+=1
+
+
+    time_taken = time.time() - start
+    print("".format(retries, round((file_size/time_taken)/1000)))
 
     f.close()
     sock.close()
