@@ -1,106 +1,62 @@
 import socket
 import sys
-import time
 import select
+import time
 
-PAYLOAD_SIZE = 1024
-HEADER_SIZE = 3
-ACK_SIZE = 2
-
-def timer():
-    start = round(time.time() * 1000)
-    while True:
-        yield round(time.time() * 1000) - start
+PACKET_SIZE = 1027
 
 
 def main(argv):
 
-    #performance tracking
-    total     = 0   #total number of packets sent
-    retries   = 0   #number of retransmissions
-    file_size = 0   #file size in bytes
+    PORT = int (argv[1])
+    FILE = argv[2]
 
-    #unpack arguments
-    HOST = argv[1]
-    PORT = int(argv[2])
-    FILE = argv[3].encode('utf-8')
-    TIMEOUT = int(argv[4])
+    total = 0
+    eof = 0 #inititalise EOF so it doesnt accidentally trigger for some reason
 
-    #file
-    f = open(FILE, 'rb')
-
-    #set up socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    #start reading file
-    file_buf = f.read(PAYLOAD_SIZE)
-
-    #start timer for performance measuring
-    start = time.time()
-
-    i = 0 # sequence number
-    while (file_buf):
-
-        seq = i.to_bytes(2, byteorder='big')#first 2 bytes for sequence number
-        eof = (0).to_bytes(1, byteorder='big')#3rd byte for EOF
+    sock.bind(("0.0.0.0", PORT))#bind to all interfaces
 
 
-        if (len(file_buf) < PAYLOAD_SIZE):
-            eof = (1).to_bytes(1, byteorder='big')
+    #open file for writing to
+    f = open(FILE, 'wb+')
+    recv = sock.recvfrom(PACKET_SIZE)
 
-        #print(bytearray(f.read(1024)))
+    prev_ack = None
+    while recv: # while there is data in the socket, keep recieving it
 
-        s_buf = bytearray()# need a new buffer for every packet
-        s_buf[0:0] = seq
-        s_buf[2:2] = eof
-        s_buf[3:3] = bytearray(file_buf)
 
-        total+= 1
-        sock.sendto(s_buf, (HOST, PORT)) #send data
-        t = timer() #start the timer
-        while True:
-
-            #doesnt block when timeout is 0 out and error can just be ignored
-            i_ready, o_ready, e_ready  = select.select([sock], [], [], 0)
-
-            if i_ready:#if socket has stuff then read and check ack
-                r_buf = i_ready[0].recvfrom(2)
-
-                ack = r_buf[0]
-                #print("Reading from buffer")
-
-                if seq == ack: #recieved correct ack
-                    break # break loop and move on to next packet
-                else:
-                    continue # do nothing, keep waiting
-
-            else: #else check timer
-                time_passed = next(t)
-                if (time_passed >= TIMEOUT):#if we have reached the timeout
-                    retries += 1
-                    total += 1
-                    sock.sendto(s_buf, (HOST, PORT)) #retransmit
-                    t = timer() # restart timer
-                    continue # go back to beginning of loop and try again
+        r_buf = recv[0]#recieve data into buffer
+        sender = recv[1] # sender address
+        r_buf = bytearray(r_buf)#cast data into byte array
 
 
 
-        file_size += len(file_buf)#update bytes sent
+        seq = r_buf[0:2] # sequence number
+        eof = r_buf[2]
+        payload = r_buf[3:]
 
-        #remember to update read buffer and sequence number
-        file_buf = f.read(PAYLOAD_SIZE)
-        i+=1
+        ack = seq # we just send the sequence number back and that will suffice for ack
+        sock.sendto(ack, sender) # send ack, we dont need to wait for a repsonse
 
-    delta = time.time() - start
-    tp = round((file_size/delta)/1000)
+        if ack != prev_ack: #duplicate packet, ignore
 
-    output = "{} {}".format(retries, tp)
-    print (output)
+            if eof == 1:
+                print("End of file reached")
+                eof = 0 #reset EOF flag, just in case
+                print("total bytes recieved: %d"%total)
+                f.write(payload)
+                f.close()
+                break
 
-    f.close()
+            total += len(payload)
+            #update ack tracker
+            prev_ack = ack
+            #write to file
+            f.write(payload)
 
-
-
+        #recieve next payload
+        recv = sock.recvfrom(PACKET_SIZE)
 
 
 
