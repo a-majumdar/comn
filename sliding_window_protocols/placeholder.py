@@ -5,6 +5,7 @@ import time
 
 PACKET_SIZE = 1027
 
+# this is receiver2.py
 
 def main(argv):
 
