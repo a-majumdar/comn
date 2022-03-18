@@ -26,6 +26,13 @@ def main(args):
         payload = bytearray(packet)
         to_send = header + payload
 
+        skt.sendto(to_send, (receiver_address, receiver_port))
+
+        counter += 1
+
+    f.close()
+    skt.close()
+
 
 def read_buffer(skt, filename):
     f = open(filename, 'rb')
