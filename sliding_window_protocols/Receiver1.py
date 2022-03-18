@@ -8,11 +8,9 @@ def main(args):
     port = int(args[1])
     filename = args[2]
 
-    skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    skt.bind(("0.0.0.0", port))
 
     f = open(filename, 'wb+')
-    packets = read_socket(skt, filename)
+    packets = read_socket(port)
     for packet in packets:
         buffer = bytearray(packet)
 
@@ -27,13 +25,16 @@ def main(args):
 
         f.write(payload)
 
-    skt.close()
 
-def read_socket(skt, filename):
+def read_socket(port):
+    skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    skt.bind(("0.0.0.0", port))
     packet = skt.recvfrom(packet_length)
     while packet:
+        print(packet)
         yield packet
         packet = skt.recvfrom(packet_length)
+    skt.close()
 
 
 if __name__ == "__main__":

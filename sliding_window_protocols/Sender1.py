@@ -5,7 +5,7 @@ payload_length = 1024
 header_length = 3
 placeholder_max = 1000
 
-def main(args):
+def main(argv):
     receiver_address = argv[1]
     receiver_port = int(argv[2])
     filename = argv[3].encode('utf-8')
@@ -30,8 +30,8 @@ def main(args):
 
         counter += 1
 
-    f.close()
     skt.close()
+
 
 
 def read_buffer(skt, filename):
@@ -40,6 +40,7 @@ def read_buffer(skt, filename):
     while packet:
         yield packet
         packet = f.read(payload_length)
+    f.close()
 
 if __name__ == "__main__":
     main(sys.argv)
