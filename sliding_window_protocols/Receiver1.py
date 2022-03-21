@@ -12,10 +12,10 @@ def main(args):
     f = open(filename, 'wb+')
     packets = read_socket(port)
     for packet in packets:
-        buffer = bytearray(packet)
+        # buffer = bytearray(packet)
 
-        eof = buffer[2]
-        payload = buffer[3:]
+        eof = packet[2]
+        payload = packet[3:]
 
         if eof == 1:
             print("File received")
