@@ -20,14 +20,11 @@ def main(args):
         buffer = received[0]#receive data into buffer
         buffer = bytearray(buffer)#cast data into byte array
 
-        seq = buffer[0:2] # sequence number
         eof = buffer[2]
         payload = buffer[3:]
 
-        seq = int.from_bytes(seq, byteorder="big")
-
         if eof == 1:
-            print("End of filename reached")
+            print("End of file reached")
             f.write(payload)
             f.close()
             break
