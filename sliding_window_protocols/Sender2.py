@@ -57,10 +57,9 @@ def main(argv):
 
         flag = True
         while flag:
-            ready = select.select([sock], timeout=0)
+            ready = sock.recvfrom(2)
             if ready:
-                read_buffer = ready[0].recvfrom(2)
-                ack = read_buffer[0]
+                ack = ready[0]
                 if seq == ack:
                     break
                 else:
