@@ -1,15 +1,16 @@
 import socket
 import sys
-import time
 import select
+
+from time import perf_counter
 
 payload_length = 1024
 header_length = 3
 
 def timer():
-    start = round(time.time() * 1000)
+    start = round(time.perf_counter() * 1000)
     while True:
-        yield round(time.time() * 1000) - start
+        yield round(time.perf_counter() * 1000) - start
 
 def main(argv):
 
@@ -31,7 +32,7 @@ def main(argv):
     f = open(filename, 'rb')
     read_buffer = f.read(payload_length)
 
-    start = time.time()
+    start = time.perf_counter()
 
     total = 0
     i = 0
@@ -83,25 +84,6 @@ def main(argv):
 
     f.close()
     sock.close()
-
-
-def rdt_send():
-    pass
-
-def rdt_rcv():
-    pass
-
-def corrupt():
-    pass
-
-def isACK():
-    pass
-
-def timeout():
-    pass
-
-def notcorrupt():
-    pass
 
 
 if __name__ == "__main__":

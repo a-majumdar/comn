@@ -40,23 +40,6 @@ def main(args):
     sock.close()
 
 
-def rdt_rcv():
-    pass
-
-
-def notcorrupt():
-    pass
-
-
-def has_seq0():
-    pass
-
-
-def has_seq1():
-    pass
-
-
-
 
 
 if __name__ == "__main__":
