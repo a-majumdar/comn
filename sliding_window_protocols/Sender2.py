@@ -1,8 +1,7 @@
 import socket
 import sys
 import select
-
-from time import perf_counter
+import time
 
 payload_length = 1024
 header_length = 3
