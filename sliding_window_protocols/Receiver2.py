@@ -17,9 +17,9 @@ def main(args):
     received, address = sock.recvfrom(packet_length)
     print('Received first packet')
 
+    seq_temp = -1
     while received: # while there is data in the socket, keep recieving it
         buffer = bytearray(received)#cast data into byte array
-        seq_temp = 0
 
         seq = buffer[0:2] # sequence number
         eof = buffer[2]
@@ -44,7 +44,7 @@ def main(args):
         f.write(payload)
 
         #receive next payload
-        received = sock.recvfrom(packet_length)
+        received, address = sock.recvfrom(packet_length)
 
     sock.close()
 
