@@ -37,16 +37,19 @@ def ACK(seq):
 def main(argv):
 
     # argument vector starts from 0 but that includes the name of the script running, so the arguments used here start from argv[1]
-    global receiver_address = argv[1]
-    global receiver_port = int(argv[2])
+    global receiver_address, receiver_port, retry_timeout
+
+    receiver_address = argv[1]
+    receiver_port = int(argv[2])
     filename = argv[3].encode('utf-8')
-    global retry_timeout = int(argv[4])
+    retry_timeout = int(argv[4])
 
     # to track performance properties
     file_size = 0
     retry_count = 0
 
-    global sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    global sock
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
     f = open(filename, 'rb')
