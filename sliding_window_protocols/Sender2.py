@@ -11,21 +11,42 @@ def timer():
     while True:
         yield round(time.perf_counter() * 1000) - start
 
+def resend(packet, seq):
+    count = 0
+    sock.sendto(buffer, (receiver_address, receiver_port))
+    t = timer()
+    while True:
+        if ACK(seq):
+            break
+        else:
+            if (next(t) >= retry_timeout):
+                sock.sendto(buffer, (receiver_address, receiver_port))
+                print('Packet resent')
+                count += 1
+                t = timer()
+    return count
+
+def ACK(seq):
+    ready = sock.recvfrom(2)
+    if ready == seq:
+        return True
+    else:
+        return False
+
+
 def main(argv):
 
     # argument vector starts from 0 but that includes the name of the script running, so the arguments used here start from argv[1]
-    receiver_address = argv[1]
-    receiver_port = int(argv[2])
+    global receiver_address = argv[1]
+    global receiver_port = int(argv[2])
     filename = argv[3].encode('utf-8')
-    retry_timeout = int(argv[4])
+    global retry_timeout = int(argv[4])
 
     # to track performance properties
     file_size = 0
     retry_count = 0
 
-
-    #set up socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    global sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
     f = open(filename, 'rb')
@@ -59,19 +80,14 @@ def main(argv):
         flag = True
         while flag:
             ready = sock.recvfrom(2)
-            if ready:
-                print('ACK received')
-                ack = ready[0]
-                if seq == ack:
-                    flag = False
-                    break
+            if ACK(seq):
+                flag = False
+                break
+            else:
                 duration = next(t)
-                if (duration >= retry_timeout/1000):
+                if (duration >= retry_timeout):
                     print('Timeout')
-                    retry_count += 1
-                    sock.sendto(buffer, (receiver_address, receiver_port))
-                    print('Packet resent')
-                    t = timer()
+                    retry_count += resend(buffer, seq)
 
         #remember to update read buffer and sequence number
         file_size += len(read_buffer)
