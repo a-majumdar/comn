@@ -18,8 +18,7 @@ def main(args):
     print('Received first packet')
 
     while received: # while there is data in the socket, keep recieving it
-        buffer = received[0]#receive data into buffer
-        buffer = bytearray(buffer)#cast data into byte array
+        buffer = bytearray(received)#cast data into byte array
         seq_temp = 0
 
         seq = buffer[0:2] # sequence number
