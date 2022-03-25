@@ -64,9 +64,6 @@ def main(argv):
                 ack = ready[0]
                 if seq == ack:
                     break
-                else:
-                    continue
-            else:
                 duration = next(t)
                 if (duration >= retry_timeout):
                     print('Timeout')
@@ -74,7 +71,6 @@ def main(argv):
                     sock.sendto(buffer, (receiver_address, receiver_port))
                     print('Packet resent')
                     t = timer()
-                    # total += 1
 
         #remember to update read buffer and sequence number
         file_size += len(read_buffer)
