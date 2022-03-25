@@ -66,7 +66,7 @@ def main(argv):
                     flag = False
                     break
                 duration = next(t)
-                if (duration >= retry_timeout):
+                if (duration >= retry_timeout/1000):
                     print('Timeout')
                     retry_count += 1
                     sock.sendto(buffer, (receiver_address, receiver_port))
