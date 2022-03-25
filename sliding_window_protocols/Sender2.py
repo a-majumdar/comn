@@ -69,8 +69,11 @@ def main(argv):
             else:
                 duration = next(t)
                 if (duration >= retry_timeout):
+                    print('Timeout')
                     retry_count += 1
-                    flag = False
+                    sock.sendto(buffer, (receiver_address, receiver_port))
+                    print('Packet resent')
+                    t = timer()
                     # total += 1
 
         #remember to update read buffer and sequence number
