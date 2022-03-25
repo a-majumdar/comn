@@ -15,6 +15,7 @@ def main(args):
     #open filename for writing to
     f = open(filename, 'wb+')
     received, address = sock.recvfrom(packet_length)
+    print('Received first packet')
 
     while received: # while there is data in the socket, keep recieving it
         buffer = received[0]#receive data into buffer
@@ -31,6 +32,7 @@ def main(args):
             seq_temp = seq
             packet = bytearray(seq.to_bytes(2, byteorder='big'))
             sock.sendto(packet, address)
+            print('ACK sent')
         else:
             continue
 
