@@ -63,6 +63,7 @@ def main(argv):
                 print('ACK received')
                 ack = ready[0]
                 if seq == ack:
+                    flag = False
                     break
                 duration = next(t)
                 if (duration >= retry_timeout):
