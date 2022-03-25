@@ -31,7 +31,7 @@ def main(argv):
     f = open(filename, 'rb')
     read_buffer = f.read(payload_length)
 
-    start = time.perf_counter()
+    start = (time.perf_counter() * 1000)
 
     total = 0
     i = 0
@@ -79,7 +79,7 @@ def main(argv):
         i+=1
 
 
-    time_taken = time.time() - start
+    time_taken = (time.perf_counter() * 1000) - start
     print("{} {}".format(retry_count, round((file_size/time_taken)/1000)))
 
     f.close()
