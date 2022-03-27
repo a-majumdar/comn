@@ -76,7 +76,8 @@ def main(argv):
         packet[3:3] = bytearray(payload)
 
         # 3. send packet, start timer
-        print('sending packet ' + seq)
+        update = "sending packet {}".format(seq)
+        print(update)
         retries += send_packet(packet, seq)
         seq += 1
 
