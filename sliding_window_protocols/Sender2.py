@@ -27,8 +27,8 @@ def send_packet(packet, seq):
         t = timer()
         while (next(t) < timeout):
             ack = s.recvfrom(2)
-            ack = int.from_bytes(ack, 'big')
-            if (ack and ack == seq):
+            received = int.from_bytes(ack, 'big')
+            if (ack and received == seq):
                 return retries
         retries += 1
 
