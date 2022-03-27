@@ -44,6 +44,7 @@ def main(args):
         f.write(payload)
 
         #receive next payload
+        print('getting next packet')
         received, address = sock.recvfrom(packet_length)
 
     sock.close()

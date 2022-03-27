@@ -29,8 +29,10 @@ def send_packet(packet, seq):
         while (next(t) < timeout):
             ack = s.recvfrom(2)
             if (ack and ack == seq):
+                print('received ACK')
                 return retries
         retries += 1
+        print(retries)
 
 
 def main(argv):
@@ -74,6 +76,7 @@ def main(argv):
         packet[3:3] = bytearray(payload)
 
         # 3. send packet, start timer
+        print('sending packet ' + seq)
         retries += send_packet(packet, seq)
         seq += 1
 
