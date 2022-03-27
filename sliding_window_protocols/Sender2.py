@@ -26,11 +26,13 @@ def send_packet(packet, seq):
     while True:
         s.sendto(packet, (address, port))
         t = timer()
-        while (next(t) < timeout):
+        sample = next(t)
+        while (sample < timeout):
             ack = s.recvfrom(2)
             if (ack and ack == seq):
                 print('received ACK')
                 return retries
+            sample = next(t)
         retries += 1
         print(retries)
 
