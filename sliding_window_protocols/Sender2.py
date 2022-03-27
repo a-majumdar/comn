@@ -21,14 +21,14 @@ def timer():
         yield round(time.perf_counter() * 1000) - start
 
 def send_packet(packet, seq):
+    seq = seq.to_bytes(2, 'big')
     retries = 0
     while True:
         s.sendto(packet, (address, port))
         t = timer()
         while (next(t) < timeout):
             ack = s.recvfrom(2)
-            received = int.from_bytes(ack, 'big')
-            if (ack and received == seq):
+            if (ack and ack == seq):
                 return retries
         retries += 1
 
