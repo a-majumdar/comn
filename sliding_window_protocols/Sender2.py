@@ -44,7 +44,7 @@ def main(argv):
     port = int(argv[2])
     filename = argv[3].encode('utf-8')
     global timeout
-    timeout = argv[4]
+    timeout = int(argv[4])
 
     # 1. set up socket
     global s
