@@ -14,11 +14,11 @@ def main(args):
 
     #open filename for writing to
     f = open(filename, 'wb+')
-    received, address = sock.recvfrom(packet_length)
-    print('Received first packet')
 
-    seq_temp = -1
-    while received: # while there is data in the socket, keep recieving it
+    seq_temp = 0
+    while True: # while there is data in the socket, keep recieving it
+        print('getting next packet')
+        received, address = sock.recvfrom(packet_length)
         buffer = bytearray(received)#cast data into byte array
 
         seq = buffer[0:2] # sequence number
@@ -27,8 +27,8 @@ def main(args):
 
         seq = int.from_bytes(seq, byteorder="big")
 
-        if (seq == seq_temp + 1):
-            seq_temp = seq
+        if (seq == seq_temp):
+            seq_temp += 1
             packet = bytearray(seq.to_bytes(2, byteorder='big'))
             sock.sendto(packet, address)
             print('ACK sent')
@@ -36,6 +36,7 @@ def main(args):
             packet = bytearray(seq_temp.to_bytes(2, byteorder='big'))
             sock.sendto(packet, address)
             print('ACK for last packet sent')
+            continue
 
         if eof == 1:
             print("End of filename reached")
@@ -45,9 +46,6 @@ def main(args):
 
         f.write(payload)
 
-        #receive next payload
-        print('getting next packet')
-        received, address = sock.recvfrom(packet_length)
 
     sock.close()
 
