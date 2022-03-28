@@ -9,7 +9,7 @@ def main(args):
     filename = args[2]
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(("127.0.0.1", port))#bind to all interfaces
+    sock.bind(("127.0.0.1", port))
 
 
     #open filename for writing to
@@ -18,7 +18,7 @@ def main(args):
     seq_temp = 0
     while True: # while there is data in the socket, keep recieving it
         print('getting next packet')
-        received, address = sock.recv(packet_length)
+        received, address = sock.recvfrom(packet_length)
         buffer = bytearray(received)
 
         seq = buffer[0:2] # sequence number
