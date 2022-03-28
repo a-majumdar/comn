@@ -9,7 +9,7 @@ def main(args):
     filename = args[2]
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(("0.0.0.0", port))#bind to all interfaces
+    sock.bind(("127.0.0.1", port))#bind to all interfaces
 
 
     #open filename for writing to
