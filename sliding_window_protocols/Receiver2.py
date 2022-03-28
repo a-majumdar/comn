@@ -30,11 +30,12 @@ def main(args):
         if (seq == seq_temp + 1):
             seq_temp = seq
             packet = bytearray(seq.to_bytes(2, byteorder='big'))
-            print(address)
-            sock.sendto(packet, (address[0], 54321))
+            sock.sendto(packet, address)
             print('ACK sent')
         else:
-            continue
+            packet = bytearray(seq_temp.to_bytes(2, byteorder='big'))
+            sock.sendto(packet, address)
+            print('ACK for last packet sent')
 
         if eof == 1:
             print("End of filename reached")
