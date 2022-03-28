@@ -27,7 +27,7 @@ def send_packet(packet, seq):
     while not received:
         s.sendto(packet, (address, port))
         try:
-            s.recvfrom(2)
+            ack = s.recvfrom(2)
             if ack == seq:
                 return retries
         except socket.timeout:
