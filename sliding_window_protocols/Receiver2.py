@@ -18,7 +18,7 @@ def main(args):
     seq_temp = 0
     while True: # while there is data in the socket, keep recieving it
         print('getting next packet')
-        received, address = sock.recvfrom(packet_length)
+        received, address = sock.recv(packet_length)
         buffer = bytearray(received)
 
         seq = buffer[0:2] # sequence number
