@@ -23,18 +23,28 @@ def timer():
 def send_packet(packet, seq):
     seq = seq.to_bytes(2, 'big')
     retries = 0
-    while True:
+    received = False
+    while not received:
         s.sendto(packet, (address, port))
-        t = timer()
-        sample = next(t)
-        while (sample < timeout):
-            ack = s.recvfrom(2)
-            if (ack and ack == seq):
-                print('received ACK')
-                return retries
-            sample = next(t)
-        retries += 1
-        print(retries)
+        ack = s.recvfrom(2)
+        if ack and (ack == seq.to_bytes(2, 'big')):
+            return retries
+        else:
+            retries += 1
+            print(retries)
+
+    # while True:
+    #     s.sendto(packet, (address, port))
+    #     t = timer()
+    #     sample = next(t)
+    #     while (sample < timeout):
+    #         ack = s.recvfrom(2)
+    #         if (ack and ack == seq):
+    #             print('received ACK')
+    #             return retries
+    #         sample = next(t)
+    #     retries += 1
+    #     print(retries)
 
 
 def main(argv):
@@ -54,6 +64,7 @@ def main(argv):
     # 1. set up socket
     global s
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(timeout/1000)
 
     # 2. open file for transfer
     f = open(filename, 'rb')
