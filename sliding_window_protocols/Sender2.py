@@ -26,10 +26,11 @@ def send_packet(packet, seq):
     received = False
     while not received:
         s.sendto(packet, (address, port))
-        ack = s.recvfrom(2)
-        if ack and (ack == seq):
-            return retries
-        else:
+        try:
+            s.recvfrom(2)
+            if ack == seq:
+                return retries
+        except socket.timeout:
             retries += 1
             print(retries)
 
