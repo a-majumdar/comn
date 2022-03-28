@@ -19,7 +19,7 @@ def main(args):
     while True: # while there is data in the socket, keep recieving it
         print('getting next packet')
         received, address = sock.recvfrom(packet_length)
-        buffer = bytearray(received)#cast data into byte array
+        buffer = bytearray(received)
 
         seq = buffer[0:2] # sequence number
         eof = buffer[2]
@@ -29,7 +29,7 @@ def main(args):
 
         if (seq == seq_temp):
             seq_temp += 1
-            packet = bytearray(seq.to_bytes(2, byteorder='big'))
+            packet = buffer[0:2]
             sock.sendto(packet, address)
             print('ACK sent')
             if eof == 1:
@@ -47,10 +47,7 @@ def main(args):
 
         f.write(payload)
 
-
     sock.close()
-
-
 
 
 if __name__ == "__main__":
