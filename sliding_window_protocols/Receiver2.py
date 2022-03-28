@@ -32,17 +32,18 @@ def main(args):
             packet = bytearray(seq.to_bytes(2, byteorder='big'))
             sock.sendto(packet, address)
             print('ACK sent')
+            if eof == 1:
+                print("End of filename reached")
+                f.write(payload)
+                f.close()
+                break
+
         else:
             packet = bytearray(seq_temp.to_bytes(2, byteorder='big'))
             sock.sendto(packet, address)
             print('ACK for last packet sent')
             continue
 
-        if eof == 1:
-            print("End of filename reached")
-            f.write(payload)
-            f.close()
-            break
 
         f.write(payload)
 

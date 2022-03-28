@@ -16,15 +16,14 @@ ack_length = 2
 # 6. repeat 3-5 until whole file is transferred
 
 def timer():
-    start = round(time.perf_counter() * 1000)
+    start = time.perf_counter()
     while True:
-        yield round(time.perf_counter() * 1000) - start
+        yield time.perf_counter() - start
 
 def send_packet(packet, seq):
     seq = seq.to_bytes(2, 'big')
     retries = 0
-    received = False
-    while not received:
+    while True:
         s.sendto(packet, (address, port))
         try:
             ack = s.recvfrom(2)
@@ -71,7 +70,7 @@ def main(argv):
     f = open(filename, 'rb')
 
     # 3a. starting loop
-    start = time.perf_counter() * 1000
+    start = time.perf_counter()
     seq = 0
     flag = True
     while flag:
@@ -95,13 +94,13 @@ def main(argv):
         retries += send_packet(packet, seq)
         seq += 1
 
-    time_taken = (time.perf_counter() * 1000) - start
+    time_taken = time.perf_counter() - start
 
     f.close()
     s.close()
 
     packets = seq + retries
-    output = "{} {}".format(retries, round((packets*1024/time_taken)/1000))
+    output = "{} {}".format(retries, (packets*1024/time_taken))
     print(output)
 
 
