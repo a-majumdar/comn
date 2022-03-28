@@ -27,7 +27,7 @@ def send_packet(packet, seq):
     while not received:
         s.sendto(packet, (address, port))
         ack = s.recvfrom(2)
-        if ack and (ack == seq.to_bytes(2, 'big')):
+        if ack and (ack == seq):
             return retries
         else:
             retries += 1
