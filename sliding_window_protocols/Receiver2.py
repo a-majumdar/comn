@@ -30,6 +30,7 @@ def main(args):
         if (seq == seq_temp + 1):
             seq_temp = seq
             packet = bytearray(seq.to_bytes(2, byteorder='big'))
+            print(address)
             sock.sendto(packet, address)
             print('ACK sent')
         else:
