@@ -29,7 +29,11 @@ def send_packet(packet, seq):
             ack = s.recv(2)
             if ack == seq:
                 return retries
+            else:
+                print("Wrong ACK received")
         except socket.timeout:
+            print("Nothing received")
+        finally:
             retries += 1
             print(retries)
 
