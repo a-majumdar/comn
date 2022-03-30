@@ -100,7 +100,7 @@ def main(argv):
     s.close()
 
     packets = seq + retries
-    output = "{} {}".format(retries, (packets*1024/time_taken))
+    output = "{} {}".format(retries, round(packets*1027/time_taken)/1000)
     print(output)
 
 
