@@ -32,15 +32,16 @@ def send_packet(packet, seq):
             elif ack > seq:
                 return retries
             else:
-                print("Wrong ACK received")
+                # print("Wrong ACK received")
                 if retries > 50:
                     print("{} {}".format(ack, seq))
                     raise Exception("Caught in loop sending packet {}".format(seq))
         except socket.timeout:
-            print("Nothing received")
+            # print("Nothing received")
+            pass
         finally:
             retries += 1
-            print(retries)
+            # print(retries)
 
     # while True:
     #     s.sendto(packet, (address, port))
@@ -99,7 +100,7 @@ def main(argv):
 
         # 3. send packet, start timer
         update = "sending packet {}".format(seq)
-        print(update)
+        # print(update)
         retries += send_packet(packet, seq)
         seq += 1
 

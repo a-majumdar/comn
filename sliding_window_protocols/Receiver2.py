@@ -17,7 +17,7 @@ def main(args):
 
     seq_temp = 0
     while True: # while there is data in the socket, keep recieving it
-        print('getting packet')
+        # print('getting packet')
         received, address = sock.recvfrom(packet_length)
         buffer = bytearray(received)
 
@@ -31,9 +31,9 @@ def main(args):
             seq_temp += 1
             packet = buffer[0:2]
             sock.sendto(packet, address)
-            print('ACK sent')
+            # print('ACK sent')
             if eof == 1:
-                print("End of filename reached")
+                # print("End of filename reached")
                 f.write(payload)
                 f.close()
                 break
@@ -41,7 +41,7 @@ def main(args):
         else:
             packet = bytearray(seq_temp.to_bytes(2, byteorder='big'))
             sock.sendto(packet, address)
-            print('ACK resent')
+            # print('ACK resent')
 
 
     sock.close()
