@@ -26,7 +26,7 @@ def send_packet(packet, seq):
     while True:
         s.sendto(packet, (address, port))
         try:
-            ack = s.recv(2)
+            ack = s.recv(ack_length)
             if ack == seq:
                 return retries
             # elif ack > seq:

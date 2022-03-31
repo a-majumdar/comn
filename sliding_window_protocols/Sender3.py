@@ -7,6 +7,26 @@ payload_length = 1024
 header_length = 3
 ack_length = 2
 
+def send_queue():
+    for x in range(window):
+        s.sendto(queue[x], (address, port))
+
+def send_and_time():
+    retries = 0
+    seq = queue[0][0:2]
+    while True:
+        start = time.perf_counter() * 1000
+        now = start
+        send_queue()
+        while now - start < timeout:
+            try:
+                ack = s.recv(ack_length)
+                if ack == seq:
+                    return retries
+            except:
+                now = time.perf_counter() * 1000
+        retries += 1
+
 def main(args):
     global address
     address = args[1]
@@ -19,6 +39,7 @@ def main(args):
 
     global s
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.setblocking(0)
 
     f = open(filename, 'rb')
 
@@ -26,6 +47,7 @@ def main(args):
     base = 0
     top = window - 1
     acked = 0
+    global queue
     queue = []
 
     # initialising queue
@@ -37,8 +59,15 @@ def main(args):
         packet[3:3] = bytearray(payload)
         queue.append(packet)
 
+    retries = 0
     while True:
-        continue
+        retries += send_and_time()
+        top += 1
+        payload = f.read(payload_length)
+        packet = bytearray()
+        packet[0:0] = top.to_bytes(2, 'big')
+
+        queue.pop(0)
 
 
 
