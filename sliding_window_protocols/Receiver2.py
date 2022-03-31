@@ -31,15 +31,14 @@ def main(args):
             seq_temp += 1
             packet = buffer[0:2]
             sock.sendto(packet, address)
+            f.write(payload)
             # print('ACK sent')
             if eof == 1:
                 # print("End of filename reached")
-                f.write(payload)
                 f.close()
                 break
-            f.write(payload)
         else:
-            packet = bytearray(seq_temp.to_bytes(2, byteorder='big'))
+            packet = bytearray(seq.to_bytes(2, byteorder='big'))
             sock.sendto(packet, address)
             # print('ACK resent')
 

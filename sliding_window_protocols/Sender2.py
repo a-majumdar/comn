@@ -29,13 +29,13 @@ def send_packet(packet, seq):
             ack = s.recv(2)
             if ack == seq:
                 return retries
-            elif ack > seq:
-                return retries
-            else:
-                # print("Wrong ACK received")
-                if retries > 50:
-                    print("{} {}".format(ack, seq))
-                    raise Exception("Caught in loop sending packet {}".format(seq))
+            # elif ack > seq:
+            #     return retries
+            # else:
+            #     # print("Wrong ACK received")
+            #     if retries > 50:
+            #         print("{} {}".format(ack, seq))
+            #         raise Exception("Caught in loop sending packet {}".format(seq))
         except socket.timeout:
             # print("Nothing received")
             pass
