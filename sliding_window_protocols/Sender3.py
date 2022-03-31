@@ -22,5 +22,25 @@ def main(args):
 
     f = open(filename, 'rb')
 
-    start = time.perf_counter()
-    seq = 0
+    time[0] = time.perf_counter()
+    base = 0
+    top = window - 1
+    acked = 0
+    queue = []
+
+    # initialising queue
+    for i in range(window):
+        payload = f.read(payload_length)
+        packet = bytearray()
+        packet[0:0] = i.to_bytes(2, byteorder='big')
+        packet[2:2] = (0).to_bytes(1, byteorder='big')
+        packet[3:3] = bytearray(payload)
+        queue.append(packet)
+
+    while True:
+        continue
+
+
+
+if __name__ == "__main__":
+    main(sys.argv)
