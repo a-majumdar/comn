@@ -110,7 +110,8 @@ def main(argv):
     s.close()
 
     packets = seq + retries
-    output = "{} {}".format(retries, round(packets*1027/time_taken)/1000)
+    throughput = round((packets * 1027) / (time_taken * 1000))
+    output = "{} {}".format(retries, throughput)
     print(output)
 
 
