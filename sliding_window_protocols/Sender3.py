@@ -8,7 +8,7 @@ header_length = 3
 ack_length = 2
 
 def send_queue():
-    for x in range(window):
+    for x in range(len(queue)):
         s.sendto(queue[x], (address, port))
 
 def send_and_time():
