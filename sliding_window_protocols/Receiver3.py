@@ -36,7 +36,7 @@ def main(args):
                 f.close()
                 break
         else:
-            packet = bytearray(seq.to_bytes(2, byteorder='big'))
+            packet = bytearray((seq_temp - 1).to_bytes(2, byteorder='big'))
             s.sendto(packet, address)
             # print('ACK resent')
 
