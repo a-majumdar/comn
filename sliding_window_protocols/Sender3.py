@@ -23,6 +23,7 @@ def send_and_time():
                 ack = s.recv(ack_length)
                 if ack == seq:
                     return retries
+                now = time.perf_counter() * 1000
             except:
                 now = time.perf_counter() * 1000
         retries += 1
@@ -43,7 +44,7 @@ def main(args):
 
     f = open(filename, 'rb')
 
-    time[0] = time.perf_counter()
+    time[0] = time.perf_counter() * 1000
     base = 0
     top = window - 1
     acked = 0
@@ -60,15 +61,31 @@ def main(args):
         queue.append(packet)
 
     retries = 0
-    while True:
+    finished = False
+    while queue:
         retries += send_and_time()
         top += 1
-        payload = f.read(payload_length)
-        packet = bytearray()
-        packet[0:0] = top.to_bytes(2, 'big')
+        if not finished:
+            payload = f.read(payload_length)
+            packet = bytearray()
+            packet[0:0] = top.to_bytes(2, 'big')
+            if len(payload) < payload_length:
+                packet[2:2] = (1).to_bytes(1, 'big')
+                finished = True
+            else:
+                packet[2:2] = (0).to_bytes(1, 'big')
+            packet[3:3] = bytearray(payload)
+            queue.append(packet)
 
         queue.pop(0)
 
+    time[1] = time.perf_counter() * 1000
+    f.close()
+    s.close()
+
+    packets = top + retries
+    throughput = round((packets * 1027) / (time[1] - time[0]))
+    print(throughput)
 
 
 if __name__ == "__main__":
