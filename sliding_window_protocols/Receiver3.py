@@ -16,7 +16,7 @@ def main(args):
 
     seq_temp = 0
     while True:
-        received, address = sock.recvfrom(packet_length)
+        received, address = s.recvfrom(packet_length)
         buffer = bytearray(received)
 
         seq = buffer[0:2] # sequence number
@@ -28,7 +28,7 @@ def main(args):
         if (seq == seq_temp):
             seq_temp += 1
             packet = buffer[0:2]
-            sock.sendto(packet, address)
+            s.sendto(packet, address)
             f.write(payload)
             # print('ACK sent')
             if eof == 1:
@@ -37,11 +37,11 @@ def main(args):
                 break
         else:
             packet = bytearray(seq.to_bytes(2, byteorder='big'))
-            sock.sendto(packet, address)
+            s.sendto(packet, address)
             # print('ACK resent')
 
 
-    sock.close()
+    s.close()
 
 
 if __name__ == "__main__":
