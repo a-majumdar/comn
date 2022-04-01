@@ -44,7 +44,7 @@ def main(args):
 
     f = open(filename, 'rb')
 
-    time[0] = time.perf_counter() * 1000
+    times[0] = time.perf_counter() * 1000
     base = 0
     top = window - 1
     acked = 0
@@ -79,12 +79,12 @@ def main(args):
 
         queue.pop(0)
 
-    time[1] = time.perf_counter() * 1000
+    times[1] = time.perf_counter() * 1000
     f.close()
     s.close()
 
     packets = top + retries
-    throughput = round((packets * 1027) / (time[1] - time[0]))
+    throughput = round((packets * 1027) / (times[1] - times[0]))
     print(throughput)
 
 
