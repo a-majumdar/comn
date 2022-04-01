@@ -44,7 +44,8 @@ def main(args):
 
     f = open(filename, 'rb')
 
-    times[0] = time.perf_counter() * 1000
+    times = []
+    times.append(time.perf_counter() * 1000)
     base = 0
     top = window - 1
     acked = 0
@@ -79,7 +80,7 @@ def main(args):
 
         queue.pop(0)
 
-    times[1] = time.perf_counter() * 1000
+    times.append(time.perf_counter() * 1000)
     f.close()
     s.close()
 
