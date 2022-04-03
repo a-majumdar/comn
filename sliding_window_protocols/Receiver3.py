@@ -30,15 +30,15 @@ def main(args):
             packet = buffer[0:2]
             s.sendto(packet, address)
             f.write(payload)
-            # print('ACK sent')
+            print('ACK sent')
             if eof == 1:
-                # print("End of filename reached")
+                # print("End of file reached")
                 f.close()
                 break
         else:
             packet = bytearray((seq_temp - 1).to_bytes(2, byteorder='big'))
             s.sendto(packet, address)
-            # print('ACK resent')
+            print('ACK resent')
 
 
     s.close()

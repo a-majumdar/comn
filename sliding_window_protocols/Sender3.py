@@ -14,6 +14,7 @@ def send_queue():
 def send_and_time():
     retries = 0
     seq = queue[0][0:2]
+    flag = False
     while True:
         start = time.perf_counter() * 1000
         now = start
@@ -22,9 +23,14 @@ def send_and_time():
             try:
                 ack = s.recv(ack_length)
                 if ack == seq:
-                    return retries
-                now = time.perf_counter() * 1000
+                    seq = int.from_bytes(seq, 'big')
+                    seq += 1
+                    seq = seq.to_bytes(2, 'big')
+                    flag = True
             except:
+                if flag:
+                    return retries, seq
+            finally:
                 now = time.perf_counter() * 1000
         retries += 1
 
@@ -48,7 +54,6 @@ def main(args):
     times.append(time.perf_counter() * 1000)
     base = 0
     top = window - 1
-    acked = 0
     global queue
     queue = []
 
@@ -64,21 +69,24 @@ def main(args):
     retries = 0
     finished = False
     while queue:
-        retries += send_and_time()
-        top += 1
-        if not finished:
-            payload = f.read(payload_length)
-            packet = bytearray()
-            packet[0:0] = top.to_bytes(2, 'big')
-            if len(payload) < payload_length:
-                packet[2:2] = (1).to_bytes(1, 'big')
-                finished = True
-            else:
-                packet[2:2] = (0).to_bytes(1, 'big')
-            packet[3:3] = bytearray(payload)
-            queue.append(packet)
-
-        queue.pop(0)
+        attempts, seq = send_and_time()
+        retries += attempts
+        increment = int.from_bytes(seq, 'big') - base
+        base = int.from_bytes(seq, 'big')
+        for i in range(increment):
+            if not finished:
+                payload = f.read(payload_length)
+                packet = bytearray()
+                top += i
+                packet[0:0] = top.to_bytes(2, 'big')
+                if len(payload) < payload_length:
+                    packet[2:2] = (1).to_bytes(1, 'big')
+                    finished = True
+                else:
+                    packet[2:2] = (0).to_bytes(1, 'big')
+                packet[3:3] = bytearray(payload)
+                queue.append(packet)
+            queue.pop(0)
 
     times.append(time.perf_counter() * 1000)
     f.close()
