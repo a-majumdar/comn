@@ -39,6 +39,7 @@ def send_and_time():
         send_queue()
         pause = input()
         while now - start < timeout:
+            print("In timed loop")
             try:
                 ack = int.from_bytes(s.recv(ack_length), 'big')
                 if ack == seq:
@@ -64,9 +65,10 @@ def send_and_time():
 
                     top += increment
             except:
-                pass
+                print("Nothing to receive")
             finally:
                 now = time.perf_counter() * 1000
+        print("Timeout")
         if flag:
             return retries, seq
         retries += 1
