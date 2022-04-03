@@ -6,12 +6,13 @@ payload_length = 1024
 header_length = 3
 ack_length = 2
 finished = False
+base = 0
 
 def send_queue():
     for x in range(len(queue)):
         s.sendto(queue[x], (address, port))
         seq = int.from_bytes(queue[x][0:2], 'big')
-        print('Packet {} sent'.format(seq))
+        print('Packet {} sent from queue'.format(seq))
 
 def make_and_send_packet(seq, sending):
     payload = f.read(payload_length)
@@ -26,13 +27,13 @@ def make_and_send_packet(seq, sending):
 
     if sending:
         s.sendto(packet, (address, port))
-        print('Packet {} sent'.format(seq))
+        print('Packet {} sent individually'.format(seq))
 
     return packet
 
 def send_and_time():
     retries = 0
-    seq = queue[0][0:2]
+    seq = int.from_bytes(queue[0][0:2], 'big')
     flag = False
 
     while True:
@@ -41,11 +42,10 @@ def send_and_time():
         send_queue()
         while now - start < timeout:
             try:
-                ack = s.recv(ack_length)
+                ack = int.from_bytes(s.recv(ack_length), 'big')
                 if ack == seq:
-                    base = int.from_bytes(seq, 'big')
                     base += 1
-                    seq = base.to_bytes(2, 'big')
+                    seq = base
                     flag = True
                     print("ACK {} received".format(base))
 
@@ -53,12 +53,12 @@ def send_and_time():
                     queue.append(make_and_send_packet(top, True))
                     queue.pop(0)
                 elif ack > seq:
-                    ack = int.from_bytes(ack, 'big')
-                    increment = ack - base + 1
+                    acked = int.from_bytes(ack, 'big')
+                    increment = acked - base + 1
                     base += increment
-                    seq = base.to_bytes(2, 'big')
+                    seq = base
                     flag = True
-                    print("ACK {} received".format(ack))
+                    print("ACK {} received".format(acked))
 
                     for i in range(increment):
                         queue.append(make_and_send_packet(top + i, True))
@@ -92,8 +92,6 @@ def main(args):
 
     times = []
     times.append(time.perf_counter() * 1000)
-    global base
-    base = 0
     global top
     top = window - 1
     global queue
