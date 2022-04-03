@@ -1,11 +1,11 @@
 import socket
 import sys
 import time
+import select
 
 payload_length = 1024
 header_length = 3
 ack_length = 2
-finished = False
 
 def send_queue():
     for x in range(len(queue)):
@@ -13,28 +13,10 @@ def send_queue():
         seq = int.from_bytes(queue[x][0:2], 'big')
         print('Packet {} sent'.format(seq))
 
-def make_and_send_packet(seq, sending):
-    payload = f.read(payload_length)
-    packet = bytearray()
-    packet[0:0] = seq.to_bytes(2, byteorder='big')
-    if len(payload) < payload_length:
-        packet[2:2] = (1).to_bytes(1, 'big')
-        finished = True
-    else:
-        packet[2:2] = (0).to_bytes(1, 'big')
-    packet[3:3] = bytearray(payload)
-
-    if sending:
-        s.sendto(packet, (address, port))
-        print('Packet {} sent'.format(seq))
-
-    return packet
-
 def send_and_time():
     retries = 0
     seq = queue[0][0:2]
     flag = False
-
     while True:
         start = time.perf_counter() * 1000
         now = start
@@ -43,28 +25,15 @@ def send_and_time():
             try:
                 ack = s.recv(ack_length)
                 if ack == seq:
-                    base = int.from_bytes(seq, 'big')
-                    base += 1
-                    seq = base.to_bytes(2, 'big')
+                    seq = int.from_bytes(seq, 'big')
+                    seq += 1
+                    seq = seq.to_bytes(2, 'big')
                     flag = True
-                    print("ACK {} received".format(base))
-
-                    top += 1
-                    queue.append(make_and_send_packet(top, True))
-                    queue.pop(0)
+                    print("ACK received")
                 elif ack > seq:
-                    ack = int.from_bytes(ack, 'big')
-                    increment = ack - base + 1
-                    base += increment
-                    seq = base.to_bytes(2, 'big')
+                    seq = ack + 1
                     flag = True
-                    print("ACK {} received".format(ack))
-
-                    for i in range(increment):
-                        queue.append(make_and_send_packet(top + i, True))
-                        queue.pop(0)
-
-                    top += increment
+                    print("ACK received")
             except:
                 pass
             finally:
@@ -87,25 +56,45 @@ def main(args):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setblocking(0)
 
-    global f
     f = open(filename, 'rb')
 
     times = []
     times.append(time.perf_counter() * 1000)
-    global base
     base = 0
-    global top
     top = window - 1
     global queue
     queue = []
 
+    # initialising queue
     for i in range(window):
-        queue.append(make_and_send_packet(i, False))
+        payload = f.read(payload_length)
+        packet = bytearray()
+        packet[0:0] = i.to_bytes(2, byteorder='big')
+        packet[2:2] = (0).to_bytes(1, byteorder='big')
+        packet[3:3] = bytearray(payload)
+        queue.append(packet)
 
     retries = 0
+    finished = False
     while queue:
         attempts, seq = send_and_time()
         retries += attempts
+        increment = int.from_bytes(seq, 'big') - base
+        base = int.from_bytes(seq, 'big')
+        for i in range(increment):
+            if not finished:
+                payload = f.read(payload_length)
+                packet = bytearray()
+                top += i
+                packet[0:0] = top.to_bytes(2, 'big')
+                if len(payload) < payload_length:
+                    packet[2:2] = (1).to_bytes(1, 'big')
+                    finished = True
+                else:
+                    packet[2:2] = (0).to_bytes(1, 'big')
+                packet[3:3] = bytearray(payload)
+                queue.append(packet)
+            queue.pop(0)
 
     times.append(time.perf_counter() * 1000)
     f.close()
