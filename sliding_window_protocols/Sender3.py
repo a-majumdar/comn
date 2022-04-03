@@ -37,6 +37,7 @@ def send_and_time():
         start = time.perf_counter() * 1000
         now = start
         send_queue()
+        pause = input()
         while now - start < timeout:
             try:
                 ack = int.from_bytes(s.recv(ack_length), 'big')
