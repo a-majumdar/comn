@@ -35,7 +35,7 @@ def send_and_time():
 
     while True:
         send_queue()
-        pause = input()
+        # pause = input()
         try:
             ack = int.from_bytes(s.recv(ack_length), 'big')
             if ack == seq:
