@@ -14,7 +14,7 @@ def main(args):
 
     f = open(filename, 'wb+')
 
-    seq_temp = 0
+    seq_temp = -1
     while True:
         received, address = s.recvfrom(packet_length)
         buffer = bytearray(received)
@@ -25,8 +25,8 @@ def main(args):
 
         seq = int.from_bytes(seq, byteorder="big")
 
-        if (seq == seq_temp):
-            seq_temp += 1
+        if (seq == seq_temp + 1):
+            seq_temp = seq
             packet = buffer[0:2]
             s.sendto(packet, address)
             f.write(payload)
@@ -36,7 +36,7 @@ def main(args):
                 f.close()
                 break
         else:
-            packet = bytearray((seq_temp - 1).to_bytes(2, byteorder='big'))
+            packet = bytearray(seq_temp.to_bytes(2, byteorder='big'))
             s.sendto(packet, address)
             print('ACK resent')
 
