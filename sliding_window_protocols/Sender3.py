@@ -9,8 +9,7 @@ ack_length = 2
 def send_queue():
     for x in range(window):
         s.sendto(queue[x], (address, port))
-        seq = int.from_bytes(queue[x][0:2], 'big')
-        print('Packet {} sent from queue'.format(seq))
+        print('Packet {} sent from queue'.format(int.from_bytes(queue[x][0:2], 'big')))
 
 def make_and_send_packet(seq, sending):
     payload = f.read(payload_length)
