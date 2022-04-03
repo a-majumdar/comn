@@ -34,40 +34,36 @@ def send_and_time():
     flag = False
 
     while True:
-        start = time.perf_counter() * 1000
-        now = start
         send_queue()
         pause = input()
-        while now - start < timeout:
-            print("In timed loop")
-            try:
-                ack = int.from_bytes(s.recv(ack_length), 'big')
-                if ack == seq:
-                    base += 1
-                    seq = base
-                    flag = True
-                    print("ACK {} received".format(base))
+        try:
+            ack = int.from_bytes(s.recv(ack_length), 'big')
+            if ack == seq:
+                base += 1
+                seq = base
+                flag = True
+                print("ACK {} received".format(base))
 
-                    top += 1
-                    queue.append(make_and_send_packet(top, True))
+                top += 1
+                queue.append(make_and_send_packet(top, True))
+                queue.pop(0)
+            elif ack > seq:
+                acked = int.from_bytes(ack, 'big')
+                increment = acked - base + 1
+                base += increment
+                seq = base
+                flag = True
+                print("ACK {} received".format(acked))
+
+                for i in range(increment):
+                    queue.append(make_and_send_packet(top + i, True))
                     queue.pop(0)
-                elif ack > seq:
-                    acked = int.from_bytes(ack, 'big')
-                    increment = acked - base + 1
-                    base += increment
-                    seq = base
-                    flag = True
-                    print("ACK {} received".format(acked))
 
-                    for i in range(increment):
-                        queue.append(make_and_send_packet(top + i, True))
-                        queue.pop(0)
-
-                    top += increment
-            except:
-                print("Nothing to receive")
-            finally:
-                now = time.perf_counter() * 1000
+                top += increment
+        except:
+            print("Nothing to receive")
+        finally:
+            now = time.perf_counter() * 1000
         print("Timeout")
         if flag:
             return retries, seq
@@ -86,7 +82,7 @@ def main(args):
 
     global s
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.setblocking(0)
+    s.settimeout(timeout / 1000)
 
     global f
     f = open(filename, 'rb')
