@@ -36,10 +36,11 @@ def main(args):
                 f.close()
                 break
         elif seq_temp < 0:
-            pass 
+            pass
         else:
             packet = bytearray(seq_temp.to_bytes(2, byteorder='big'))
             s.sendto(packet, address)
+            print("ACK {} sent".format(seq_temp))
 
 
     s.close()
