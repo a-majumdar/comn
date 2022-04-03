@@ -10,7 +10,8 @@ ack_length = 2
 def send_queue():
     for x in range(len(queue)):
         s.sendto(queue[x], (address, port))
-        print('Packet {} sent'.format(x))
+        seq = int.from_bytes(queue[x][0:2], 'big')
+        print('Packet {} sent'.format(seq))
 
 def send_and_time():
     retries = 0
