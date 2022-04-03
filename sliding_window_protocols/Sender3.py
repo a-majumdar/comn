@@ -27,6 +27,8 @@ def send_and_time():
                     seq += 1
                     seq = seq.to_bytes(2, 'big')
                     flag = True
+                else:
+                    print(ack > seq)
             except:
                 if flag:
                     return retries, seq
