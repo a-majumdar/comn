@@ -28,12 +28,15 @@ def send_and_time():
                     seq = seq.to_bytes(2, 'big')
                     flag = True
                 elif ack > seq:
-                    return retries, ack 
+                    seq = ack + 1
+                    flag = True
             except:
                 if flag:
                     return retries, seq
             finally:
                 now = time.perf_counter() * 1000
+        if flag:
+            return retries, seq
         retries += 1
 
 def main(args):
