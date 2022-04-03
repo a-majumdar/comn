@@ -35,6 +35,8 @@ def main(args):
                 # print("End of file reached")
                 f.close()
                 break
+        elif seq_temp < 0:
+            pass 
         else:
             packet = bytearray(seq_temp.to_bytes(2, byteorder='big'))
             s.sendto(packet, address)
