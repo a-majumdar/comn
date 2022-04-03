@@ -13,9 +13,9 @@ def main(args):
     s.bind(("127.0.0.1", port))
 
     f = open(filename, 'wb+')
-
+    flag = True
     seq_temp = -1
-    while True:
+    while flag:
         received, address = s.recvfrom(packet_length)
         buffer = bytearray(received)
 
@@ -34,7 +34,7 @@ def main(args):
             if eof == 1:
                 # print("End of file reached")
                 f.close()
-                break
+                flag = False
         elif seq_temp < 0:
             pass
         else:
