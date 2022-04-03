@@ -27,12 +27,13 @@ def send_and_time():
                     seq += 1
                     seq = seq.to_bytes(2, 'big')
                     flag = True
+                    print("ACK received")
                 elif ack > seq:
                     seq = ack + 1
                     flag = True
+                    print("ACK received")
             except:
-                if flag:
-                    return retries, seq
+                pass
             finally:
                 now = time.perf_counter() * 1000
         if flag:

@@ -30,7 +30,7 @@ def main(args):
             packet = buffer[0:2]
             s.sendto(packet, address)
             f.write(payload)
-            print('ACK sent')
+            print('ACK {} sent'.format(int.from_bytes(seq, 'big')))
             if eof == 1:
                 # print("End of file reached")
                 f.close()
