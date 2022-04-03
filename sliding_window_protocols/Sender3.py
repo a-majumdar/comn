@@ -9,7 +9,7 @@ finished = False
 base = 0
 
 def send_queue():
-    for x in range(len(queue)):
+    for x in range(window):
         s.sendto(queue[x], (address, port))
         seq = int.from_bytes(queue[x][0:2], 'big')
         print('Packet {} sent from queue'.format(seq))
@@ -81,6 +81,7 @@ def main(args):
     filename = args[3].encode('utf-8')
     global timeout
     timeout = int(args[4])
+    global window
     window = int(args[5])
 
     global s
