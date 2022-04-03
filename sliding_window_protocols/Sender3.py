@@ -5,8 +5,6 @@ import time
 payload_length = 1024
 header_length = 3
 ack_length = 2
-finished = False
-base = 0
 
 def send_queue():
     for x in range(window):
@@ -93,10 +91,15 @@ def main(args):
 
     times = []
     times.append(time.perf_counter() * 1000)
+    global base
+    base = 0
     global top
     top = window - 1
     global queue
     queue = []
+
+    global finished
+    finished = False
 
     for i in range(window):
         queue.append(make_and_send_packet(i, False))
