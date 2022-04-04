@@ -28,6 +28,9 @@ def update_queue(ack):
 
 
 def send():
+    global nextSeq
+    nextSeq = 1
+    
     while not lastACKed:
         lock.acquire()
         while nextSeq < base + window and EOFSeq == math.inf:
