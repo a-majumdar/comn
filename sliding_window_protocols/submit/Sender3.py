@@ -1,15 +1,20 @@
-import sys
-import math
-import time
+/* Ananya Majumdar 1802817 */
+
 import socket
-import common
+import sys
+import time
+import math
 import threading
+import common
 
 payload_length = 1024
 header_length = 3
 ack_length = 2
 
 def next_packet():
+    global f
+    global file
+    global nextSeq
     payload = f.read(payload_length)
     file += len(packet)
     if len(payload) < payload_length:
@@ -17,67 +22,79 @@ def next_packet():
     else:
         return create_packet(payload, nextSeq, False)
 
+def send_queue():
+    for packet in window:
+        s.sendto(packet, (address, port))
+
 def update_queue(ack):
-    if ack < base:
-        return
-    index = ack - base
-    acks[index] = True
-    while acks[0] == True:
-        del queue[0]
-        queue.append(None)
-        del acks[0]
-        acks.append(False)
-        base += 1
+    increment = ack - base + 1
+    del queue[:increment]
+    base = ack + 1
+
 
 def send():
-    while True:
+    global nextSeq
+    nextSeq = 1
+    global EOFSeq
+    EOFSeq = math.inf
+    while not lastACKed:
         lock.acquire()
-        while nextSeq < base + window:
+        while nextSeq < base + window and EOFSeq == math.inf:
             packet = next_packet()
-            if nextSeq == 0:
+            if nextSeq == 1:
                 start = time.perf_counter()
-
-            index = nextSeq - base
-            queue[index] = packet
+            queue.append(packet)
             s.sendto(packet, (address, port))
 
-            timer = threading.Timer(timeout, timeout, args = (nextSeq, ))
-            timer.start()
+            if base == nextSeq:
+                timer.start()
 
             nextSeq += 1
 
             if isEOF(packet):
                 EOFSeq = get_seq(packet)
-                lock.release()
-                return
 
         lock.release()
         time.sleep(0.01)
 
+
 def receive():
-    while True:
+    global lastACKed
+    lastACKed = False
+    while not lastACKed:
         ack, _ = s.recvfrom(ack_length)
         lock.acquire()
         ack = int.from_bytes(ack, 'big')
-        update_queue(ack)
-
-        if base > EOFSeq:
-            throughput = (file / 1024) / (time.perf_counter() - start)
+        if ack < base:
             lock.release()
-            return
+            continue
+
+        update_queue()
+        if base == nextSeq:
+            timer.stop()
+        else:
+            timer.start()
+
+        if ack == EOFSeq:
+            lastACKed = True
+            throughput = (file / 1024) / (time.perf_counter() - start)
 
         lock.release()
 
-def timeout(seq):
-    lock.acquire()
-    if base > seq or acks[seq - base]:
-        lock.release()
-        return
+def timeout():
+    while not lastACKed:
+        lock.acquire()
+        if timer.timed_out():
+            timer.start()
+            send_queue()
+            sleep = timeout
+        elif timer.running():
+            sleep = max(0.001, timer.start + timeout - time.perf_counter())
+        else:
+            sleep = timeout
 
-    s.sendto(queue[seq - base], (address, port))
-    timer = threading.Timer(timeout, timeout, args = (seq, ))
-    timer.start()
-    lock.release()
+        lock.release()
+        time.sleep(sleep)
 
 
 def main(args):
@@ -98,16 +115,17 @@ def main(args):
     global f
     f = open(filename, 'rb')
 
+    global timer
+    timer = common.Timer(timeout)
+
+    global lastACKed
+    lastACKed = False
+
     global base
-    base = 0
-    global nextSeq
-    nextSeq = 0
-    global EOFSeq
-    EOFSeq = math.inf
+    base = 1
     global queue
-    queue = [None] * window
-    global acks
-    acks = [False] * window
+    queue = []
+    global lock
     lock = threading.Lock()
 
     global start
@@ -117,18 +135,24 @@ def main(args):
     global throughput
     throughput = 0
 
+    s.setblocking(1)
+
     sender = threading.Thread(target = send)
     receiver = threading.Thread(target = receive)
+    timeouts = threading.Thread(target = timeout)
 
     sender.start()
     receiver.start()
+    timeouts.start()
 
     sender.join()
-    receiver.start()
+    receiver.join()
+    timeouts.join()
 
     print(throughput)
     f.close()
     s.close()
+
 
 if __name__ == "__main__":
     main(sys.argv)
