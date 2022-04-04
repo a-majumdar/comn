@@ -10,6 +10,9 @@ header_length = 3
 ack_length = 2
 
 def next_packet():
+    global f
+    global file
+    global nextSeq
     payload = f.read(payload_length)
     file += len(packet)
     if len(payload) < payload_length:
