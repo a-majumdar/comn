@@ -105,6 +105,7 @@ def main(args):
     f = open(filename, 'rb')
 
     timer = common.Timer(timeout)
+    global lastACKed
     lastACKed = False
 
     global base
