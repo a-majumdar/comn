@@ -113,6 +113,9 @@ def main(args):
     global timer
     timer = common.Timer(timeout)
 
+    global lastACKed
+    lastACKed = False
+
     global base
     base = 1
     global queue
