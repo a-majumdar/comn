@@ -130,6 +130,8 @@ def main(args):
     global throughput
     throughput = 0
 
+    s.setblocking(1)
+
     sender = threading.Thread(target = send)
     receiver = threading.Thread(target = receive)
     timeouts = threading.Thread(target = timeout)
