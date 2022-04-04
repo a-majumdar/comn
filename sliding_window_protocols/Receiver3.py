@@ -1,5 +1,6 @@
-import socket
 import sys
+import socket
+import common
 
 packet_length = 1027
 
@@ -12,36 +13,30 @@ def main(args):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(("127.0.0.1", port))
 
+    global f
     f = open(filename, 'wb+')
-    flag = True
-    seq_temp = -1
-    while flag:
-        received, address = s.recvfrom(packet_length)
-        buffer = bytearray(received)
 
-        seq = buffer[0:2] # sequence number
-        eof = buffer[2]
-        payload = buffer[3:]
+    global expected
+    expected = 1
 
-        seq = int.from_bytes(seq, byteorder="big")
+    while True:
+        packet, address = s.recvfrom(packet_length)
+        seq = get_seq(packet)
+        if expected == seq:
+            file.write(get_payload(packet))
+            expected += 1
 
-        if (seq == seq_temp + 1):
-            seq_temp = seq
-            packet = buffer[0:2]
-            s.sendto(packet, address)
-            f.write(payload)
-            print('ACK {} sent'.format(seq))
-            if eof == 1:
-                # print("End of file reached")
-                f.close()
-                flag = False
-        elif seq_temp < 0:
-            pass
-        else:
-            packet = bytearray(seq_temp.to_bytes(2, byteorder='big'))
-            s.sendto(packet, address)
-            print("ACK {} sent".format(seq_temp))
+        sendACK(expected - 1, s, address)
+        if isEOF(packet) and seq == expected - 1:
+            break
 
+    s.settimeout(1)
+    while True:
+        try:
+            packet, address = s.recvfrom(packet_length)
+            sendACK(expected - 1, s, address)
+        except timeout:
+            break
 
     s.close()
 

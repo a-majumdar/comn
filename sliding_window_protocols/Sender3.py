@@ -1,73 +1,90 @@
 import socket
 import sys
 import time
+import math
+import threading
+import common
 
 payload_length = 1024
 header_length = 3
 ack_length = 2
 
-def send_queue():
-    for x in range(window):
-        s.sendto(queue[x], (address, port))
-        print('Packet {} sent from queue'.format(int.from_bytes(queue[x][0:2], 'big')))
-
-def make_and_send_packet(seq, sending):
+def next_packet():
     payload = f.read(payload_length)
-    packet = bytearray()
-    packet[0:0] = seq.to_bytes(2, byteorder='big')
+    file += len(packet)
     if len(payload) < payload_length:
-        packet[2:2] = (1).to_bytes(1, 'big')
-        finished = True
+        return create_packet(payload, nextSeq, True)
     else:
-        packet[2:2] = (0).to_bytes(1, 'big')
-    packet[3:3] = bytearray(payload)
+        return create_packet(payload, nextSeq, False)
 
-    if sending:
+def send_queue():
+    for packet in window:
         s.sendto(packet, (address, port))
-        print('Packet {} sent individually'.format(seq))
 
-    return packet
+def update_queue(ack):
+    increment = ack - base + 1
+    del queue[:increment]
+    base = ack + 1
 
-def send_and_time():
-    retries = 0
-    seq = int.from_bytes(queue[0][0:2], 'big')
-    flag = False
 
-    while True:
-        send_queue()
-        # pause = input()
-        try:
-            ack = int.from_bytes(s.recv(ack_length), 'big')
-            if ack == seq:
-                base += 1
-                seq = base
-                flag = True
-                print("ACK {} received".format(base))
+def send():
+    while not lastACKed:
+        lock.acquire()
+        while nextSeq < base + window and EOFSeq == math.inf:
+            packet = next_packet()
+            if nextSeq == 1:
+                start = time.perf_counter()
+            queue.append(packet)
+            s.sendto(packet, (address, port))
 
-                top += 1
-                queue.append(make_and_send_packet(top, True))
-                queue.pop(0)
-            elif ack > seq:
-                acked = int.from_bytes(ack, 'big')
-                increment = acked - base + 1
-                base += increment
-                seq = base
-                flag = True
-                print("ACK {} received".format(acked))
+            if base == nextSeq:
+                timer.start()
 
-                for i in range(increment):
-                    queue.append(make_and_send_packet(top + i, True))
-                    queue.pop(0)
+            nextSeq += 1
 
-                top += increment
-        except:
-            print("Nothing to receive")
-        finally:
-            now = time.perf_counter() * 1000
-        print("Timeout")
-        if flag:
-            return retries, seq
-        retries += 1
+            if isEOF(packet):
+                EOFSeq = get_seq(packet)
+
+        lock.release()
+        time.sleep(0.01)
+
+
+def receive():
+    while not lastACKed:
+        ack, _ = s.recvfrom(ack_length)
+        lock.acquire()
+        ack = int.from_bytes(ack, 'big')
+        if ack < base:
+            lock.release()
+            continue
+
+        update_queue()
+        if base == nextSeq:
+            timer.stop()
+        else:
+            timer.start()
+
+        if ack == EOFSeq:
+            lastACKed = True
+            throughput = (file / 1024) / (time.perf_counter() - start)
+
+        lock.release()
+
+def timeout():
+    while not lastACKed:
+        lock.acquire()
+        if timer.timed_out():
+            timer.start()
+            send_queue()
+            sleep = timeout
+        elif timer.running():
+            sleep = max(0.001, timer.start + timeout - time.perf_counter())
+        else:
+            sleep = timeout
+
+        lock.release()
+        time.sleep(sleep)
+
 
 def main(args):
     global address
@@ -76,7 +93,7 @@ def main(args):
     port = int(args[2])
     filename = args[3].encode('utf-8')
     global timeout
-    timeout = int(args[4])
+    timeout = int(args[4]) / 1000
     global window
     window = int(args[5])
 
@@ -87,33 +104,41 @@ def main(args):
     global f
     f = open(filename, 'rb')
 
-    times = []
-    times.append(time.perf_counter() * 1000)
+    timer = Timer(timeout)
+    lastACKed = False
+
     global base
-    base = 0
-    global top
-    top = window - 1
+    base = 1
+    global nextSeq
+    nextSeq = 1
+    global EOFSeq
+    EOFSeq = math.inf
     global queue
     queue = []
+    lock = threading.Lock()
 
-    global finished
-    finished = False
+    global start
+    start = 0
+    global file
+    file = 0
+    global throughput
+    throughput = 0
 
-    for i in range(window):
-        queue.append(make_and_send_packet(i, False))
+    sender = threading.Thread(target = send)
+    receiver = threading.Thread(target = receive)
+    timeouts = threading.Thread(target = timeout)
 
-    retries = 0
-    while queue:
-        attempts, seq = send_and_time()
-        retries += attempts
+    sender.start()
+    receiver.start()
+    timeouts.start()
 
-    times.append(time.perf_counter() * 1000)
+    sender.join()
+    receiver.join()
+    timeouts.join()
+
+    print(throughput)
     f.close()
     s.close()
-
-    packets = top + retries
-    throughput = round((packets * 1027) / (times[1] - times[0]))
-    print(throughput)
 
 
 if __name__ == "__main__":
