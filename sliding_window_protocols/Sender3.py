@@ -50,6 +50,8 @@ def send():
 
 
 def receive():
+    global lastACKed
+    lastACKed = False
     while not lastACKed:
         ack, _ = s.recvfrom(ack_length)
         lock.acquire()
@@ -104,8 +106,9 @@ def main(args):
     global f
     f = open(filename, 'rb')
 
-    global timer 
+    global timer
     timer = common.Timer(timeout)
+
     global lastACKed
     lastACKed = False
 
