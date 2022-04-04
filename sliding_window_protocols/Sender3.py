@@ -104,6 +104,7 @@ def main(args):
     global f
     f = open(filename, 'rb')
 
+    global timer 
     timer = common.Timer(timeout)
     global lastACKed
     lastACKed = False
@@ -116,6 +117,7 @@ def main(args):
     EOFSeq = math.inf
     global queue
     queue = []
+    global lock
     lock = threading.Lock()
 
     global start
