@@ -30,7 +30,8 @@ def update_queue(ack):
 def send():
     global nextSeq
     nextSeq = 1
-    
+    global EOFSeq
+    EOFSeq = math.inf
     while not lastACKed:
         lock.acquire()
         while nextSeq < base + window and EOFSeq == math.inf:
@@ -112,15 +113,8 @@ def main(args):
     global timer
     timer = common.Timer(timeout)
 
-    global lastACKed
-    lastACKed = False
-
     global base
     base = 1
-    global nextSeq
-    nextSeq = 1
-    global EOFSeq
-    EOFSeq = math.inf
     global queue
     queue = []
     global lock
