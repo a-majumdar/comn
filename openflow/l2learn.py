@@ -36,6 +36,7 @@ class L2Learn14(app_manager.RyuApp):
         dp = msg.datapath
         ofp, psr, did = (dp.ofproto, dp.ofproto_parser, format(dp.id, '016d'))
         eth = pkt.get_protocols(ethernet.ethernet)[0]
+
         dst, src = (eth.dst, eth.src)
         self.ht.setdefault(did, {})
         he = self.ht[did] # shorthand
@@ -47,6 +48,7 @@ class L2Learn14(app_manager.RyuApp):
             self.add_flow(dp, 1, mtc, acts, msg.buffer_id)
             if msg.buffer_id != ofp.OFP_NO_BUFFER:
                 return
+                
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
                                in_port=in_port, actions=acts, data=data)

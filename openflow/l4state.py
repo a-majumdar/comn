@@ -15,7 +15,7 @@ class L4State14(app_manager.RyuApp):
 
     def __init__(self, *args, **kwargs):
         super(L4State14, self).__init__(*args, **kwargs)
-        self.ht = set()
+        self.ht = set() # sequence of distinct iterable elements
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def features_handler(self, ev):
@@ -41,6 +41,7 @@ class L4State14(app_manager.RyuApp):
         # ofp = openflow protocol
         # psr = ofp parser
         # did = datapath id
+        # FORMATTING: converting dp.id to a 16-digit number and padding to the left with zeros
         ofp, psr, did = (dp.ofproto, dp.ofproto_parser, format(dp.id, '016d'))
         eth = pkt.get_protocols(ethernet.ethernet)[0]
         #
@@ -53,18 +54,12 @@ class L4State14(app_manager.RyuApp):
         #               transport layer protocol, tproto
         #               source port, sport
         #               destination port, dport)
-        pkts = packet.Packet(array.array('B', ev.msg.data))
-        protos = []
-        for p in pkts:
-            protos.append(p.protocol_name)
 
-        if in_port == 1:
-            pass
-            # insert flow to the switch
-        if in_port == 2: # and returning packet from existing TCP connection
-            # forward to port 2
-            # insert corresponding flow
-            pass
+        # CUT CODE IS IN PLACEHOLDER
+        smac = eth.src
+        dmac = eth.dst
+        sport = in_port
+        
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
