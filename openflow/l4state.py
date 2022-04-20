@@ -36,11 +36,35 @@ class L4State14(app_manager.RyuApp):
     def _packet_in_handler(self, ev):
         msg = ev.msg
         in_port, pkt = (msg.match['in_port'], packet.Packet(msg.data))
+        # dp = datapath
         dp = msg.datapath
+        # ofp = openflow protocol
+        # psr = ofp parser
+        # did = datapath id
         ofp, psr, did = (dp.ofproto, dp.ofproto_parser, format(dp.id, '016d'))
         eth = pkt.get_protocols(ethernet.ethernet)[0]
         #
         # write your code here
+
+        #flow matching:(input switch port, in_port
+        #               network layer protocol, nproto
+        #               source IP address, sip
+        #               destination IP address, dip
+        #               transport layer protocol, tproto
+        #               source port, sport
+        #               destination port, dport)
+        pkts = packet.Packet(array.array('B', ev.msg.data))
+        protos = []
+        for p in pkts:
+            protos.append(p.protocol_name)
+
+        if in_port == 1:
+            pass
+            # insert flow to the switch
+        if in_port == 2: # and returning packet from existing TCP connection
+            # forward to port 2
+            # insert corresponding flow
+            pass
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
