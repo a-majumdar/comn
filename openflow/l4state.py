@@ -64,7 +64,7 @@ class L4State14(app_manager.RyuApp):
                 if not (flow in self.ht):
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
             else:
-                if (other_port, dip, sip, dport, sport) in ht and not (flow in ht):
+                if (other_port, dip, sip, dport, sport) in self.ht and not (flow in self.ht):
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
         else:
             acts = [psr.OFPActionOutput(other_port)]
