@@ -42,22 +42,10 @@ class L4State14(app_manager.RyuApp):
         #
         # write your code here
         other_port = [1, 2].remove(in_port)[0]
-
-        #flow matching:(input switch port, in_port
-        #               network layer protocol, nproto
-        #               source IP address, sip
-        #               destination IP address, dip
-        #               transport layer protocol, tproto
-        #               source port, sport
-        #               destination port, dport)
-
-        # CUT CODE IS IN PLACEHOLDER
-
         forwarding = True
         for p in pkt:
             if p.protocol_name == 'ipv4' or p.protocol_name == 'tcp':
                 forwarding = False
-
         if not forwarding:
             smac, dmac = (eth.src, eth.dst)
             tproto = pkt.get_protocol(tcp.tcp)
@@ -71,20 +59,16 @@ class L4State14(app_manager.RyuApp):
                 if (not (tproto.has_flags(tcp.TCP_SYN) or (tproto.has_flags(tcp.TCP_FIN) or (tproto.has_flags(tcp.TCP_RST)))
                 or (tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_FIN))
                 or (tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_RST)):
-                    return
-
+                    acts = psr.OFPActionOutput(ofp.OFPPC_NO_FWD)
                 if not (flow in ht):
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
-
             else:
                 if (other_port, dip, sip, dport, sport) in ht and not (flow in ht):
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
         else:
             acts = [psr.OFPActionOutput(other_port)]
-
         if msg.buffer_id != ofp.OFP_NO_BUFFER:
             return
-
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
