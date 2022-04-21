@@ -41,7 +41,7 @@ class L4State14(app_manager.RyuApp):
         eth = pkt.get_protocols(ethernet.ethernet)[0]
         #
         # write your code here
-        other_port = [1, 2].remove(in_port)[0]
+        other_port = [1, 2].remove(in_port)
         forwarding = True
         for p in pkt:
             if p.protocol_name == 'ipv4' or p.protocol_name == 'tcp':
