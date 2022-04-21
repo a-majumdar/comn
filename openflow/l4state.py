@@ -59,14 +59,14 @@ class L4State14(app_manager.RyuApp):
                 synfin = tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_FIN)
                 synrst = tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_RST)
                 if flagged and not (synfin or synrst):
-                    acts = psr.OFPActionOutput(ofp.OFPPC_NO_FWD)
+                    acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
                 if not (flow in self.ht):
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
             else:
                 if (other_port, dip, sip, dport, sport) in self.ht and not (flow in self.ht):
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
                 else:
-                    acts = psr.OFPActionOutput(ofp.OFPPC_NO_FWD)
+                    acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
         else:
             acts = [psr.OFPActionOutput(other_port)]
         #
