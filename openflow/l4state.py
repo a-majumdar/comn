@@ -68,8 +68,6 @@ class L4State14(app_manager.RyuApp):
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
         else:
             acts = [psr.OFPActionOutput(other_port)]
-        if msg.buffer_id != ofp.OFP_NO_BUFFER:
-            return
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
