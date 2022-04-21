@@ -61,6 +61,9 @@ class ExampleSwitch13(app_manager.RyuApp):
         self.logger.info("packet in %s %s %s %s", dpid, src, dst, in_port)
 
 
+
+
+
         # *** CONTINUE COPYING HERE ***
 
         # learn a mac address to avoid FLOOD next time.
@@ -80,6 +83,11 @@ class ExampleSwitch13(app_manager.RyuApp):
         if out_port != ofproto.OFPP_FLOOD:
             match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
             self.add_flow(datapath, 1, match, actions)
+
+
+
+
+
 
         # construct packet_out message and send it.
         out = parser.OFPPacketOut(datapath=datapath,

@@ -36,16 +36,12 @@ class L4State14(app_manager.RyuApp):
     def _packet_in_handler(self, ev):
         msg = ev.msg
         in_port, pkt = (msg.match['in_port'], packet.Packet(msg.data))
-        # dp = datapath
         dp = msg.datapath
-        # ofp = openflow protocol
-        # psr = ofp parser
-        # did = datapath id
-        # FORMATTING: converting dp.id to a 16-digit number and padding to the left with zeros
         ofp, psr, did = (dp.ofproto, dp.ofproto_parser, format(dp.id, '016d'))
         eth = pkt.get_protocols(ethernet.ethernet)[0]
         #
         # write your code here
+        other_port = [1, 2].remove(in_port)[0]
 
         #flow matching:(input switch port, in_port
         #               network layer protocol, nproto
@@ -56,10 +52,39 @@ class L4State14(app_manager.RyuApp):
         #               destination port, dport)
 
         # CUT CODE IS IN PLACEHOLDER
-        smac = eth.src
-        dmac = eth.dst
-        sport = in_port
-        
+
+        forwarding = True
+        for p in pkt:
+            if p.protocol_name == 'ipv4' or p.protocol_name == 'tcp':
+                forwarding = False
+
+        if not forwarding:
+            smac, dmac = (eth.src, eth.dst)
+            tproto = pkt.get_protocol(tcp.tcp)
+            nproto = pkt.get_protocol(ipv4.ipv4)
+            sip, dip = (nproto.src, nproto.dst)
+            sport, dport = (tproto.src_port, tproto.dst_port)
+            flow = (in_port, sip, dip, sport, dport)
+            match = psr.OFPMatch(in_port=in_port, ip_proto=nproto.proto, ipv4_src=sip, ipv4_dst=dip, tcp_src=sport, tcp_dst=dport)
+            acts = [psr.OFPActionOutput(other_port)]
+            if in_port == 1:
+                if (not (tproto.has_flags(tcp.TCP_SYN) or (tproto.has_flags(tcp.TCP_FIN) or (tproto.has_flags(tcp.TCP_RST)))
+                or (tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_FIN))
+                or (tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_RST)):
+                    return
+
+                if not (flow in ht):
+                    self.add_flow(dp, 1, match, acts, msg.buffer_id)
+
+            else:
+                if (other_port, dip, sip, dport, sport) in ht and not (flow in ht):
+                    self.add_flow(dp, 1, match, acts, msg.buffer_id)
+        else:
+            acts = [psr.OFPActionOutput(other_port)]
+
+        if msg.buffer_id != ofp.OFP_NO_BUFFER:
+            return
+
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
