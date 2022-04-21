@@ -33,8 +33,8 @@ class L2Learn14(app_manager.RyuApp):
     def _packet_in_handler(self, ev):
         msg = ev.msg
         in_port, pkt = (msg.match['in_port'], packet.Packet(msg.data))
-        for p in pkt.protocols:
-            print(p)
+        for p in pkt:
+            print(p.protocol_name)
         print()
         dp = msg.datapath
         ofp, psr, did = (dp.ofproto, dp.ofproto_parser, format(dp.id, '016d'))
