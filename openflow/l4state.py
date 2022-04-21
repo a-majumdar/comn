@@ -65,6 +65,8 @@ class L4State14(app_manager.RyuApp):
             else:
                 if (other_port, dip, sip, dport, sport) in self.ht and not (flow in self.ht):
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                else:
+                    acts = psr.OFPActionOutput(ofp.OFPPC_NO_FWD)
         else:
             acts = [psr.OFPActionOutput(other_port)]
         #
