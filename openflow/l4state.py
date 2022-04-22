@@ -42,10 +42,10 @@ class L4State14(app_manager.RyuApp):
         #
         # write your code here
         other_port = [1, 2].remove(in_port)
-        forwarding = True
+        # forwarding = True
         if pkt.get_protocol(tcp.tcp) and pkt.get_protocol(ipv4.ipv4):
-            forwarding = False
-        if not forwarding:
+        #     forwarding = False
+        # if not forwarding:
             smac, dmac = (eth.src, eth.dst)
             tproto = pkt.get_protocol(tcp.tcp)
             nproto = pkt.get_protocol(ipv4.ipv4)
@@ -60,10 +60,10 @@ class L4State14(app_manager.RyuApp):
                 synrst = tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_RST)
                 if flagged and not (synfin or synrst):
                     acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
-                if not (flow in self.ht):
-                    self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                    if not (flow in self.ht):
+                        self.add_flow(dp, 1, match, acts, msg.buffer_id)
             else:
-                if (other_port, dip, sip, dport, sport) in self.ht and not (flow in self.ht):
+                if (other_port, dip, sip, dport, sport) in self.ht:
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
                 else:
                     acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
