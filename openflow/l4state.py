@@ -42,6 +42,7 @@ class L4State14(app_manager.RyuApp):
         #
         # write your code here
         other_port = [1, 2].remove(in_port)
+        acts = [psr.OFPActionOutput(other_port)]
         # forwarding = True
         if pkt.get_protocol(tcp.tcp) and pkt.get_protocol(ipv4.ipv4):
         #     forwarding = False
@@ -53,7 +54,6 @@ class L4State14(app_manager.RyuApp):
             sport, dport = (tproto.src_port, tproto.dst_port)
             flow = (in_port, sip, dip, sport, dport)
             match = psr.OFPMatch(in_port=in_port, ipv4_src=sip, ipv4_dst=dip, tcp_src=sport, tcp_dst=dport)
-            acts = [psr.OFPActionOutput(other_port)]
             if in_port == 1:
                 flagged = tproto.has_flags(tcp.TCP_SYN) or tproto.has_flags(tcp.TCP_FIN) or tproto.has_flags(tcp.TCP_RST)
                 synfin = tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_FIN)
@@ -69,8 +69,6 @@ class L4State14(app_manager.RyuApp):
                     self.ht.add(flow)
                 else:
                     acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
-        else:
-            acts = [psr.OFPActionOutput(other_port)]
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
