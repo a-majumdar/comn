@@ -33,8 +33,7 @@ class L2Learn14(app_manager.RyuApp):
     def _packet_in_handler(self, ev):
         msg = ev.msg
         in_port, pkt = (msg.match['in_port'], packet.Packet(msg.data))
-        if pkt.get_protocol(ethernet.ethernet): print(True)
-        print('next')
+        # print('here')
         dp = msg.datapath
         ofp, psr, did = (dp.ofproto, dp.ofproto_parser, format(dp.id, '016d'))
         eth = pkt.get_protocols(ethernet.ethernet)[0]
