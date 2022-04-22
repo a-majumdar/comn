@@ -6,6 +6,7 @@ from ryu.ofproto import ofproto_v1_4
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
 from ryu.lib.packet import ether_types
+from ryu.lib.packet import tcp
 
 class L2Learn14(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_4.OFP_VERSION]
