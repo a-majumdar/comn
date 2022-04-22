@@ -52,7 +52,7 @@ class L4State14(app_manager.RyuApp):
             sip, dip = (nproto.src, nproto.dst)
             sport, dport = (tproto.src_port, tproto.dst_port)
             flow = (in_port, sip, dip, sport, dport)
-            match = psr.OFPMatch(in_port=in_port, ip_proto=nproto.proto, ipv4_src=sip, ipv4_dst=dip, tcp_src=sport, tcp_dst=dport)
+            match = psr.OFPMatch(in_port=in_port, ipv4_src=sip, ipv4_dst=dip, tcp_src=sport, tcp_dst=dport)
             acts = [psr.OFPActionOutput(other_port)]
             if in_port == 1:
                 flagged = tproto.has_flags(tcp.TCP_SYN) or tproto.has_flags(tcp.TCP_FIN) or tproto.has_flags(tcp.TCP_RST)
@@ -62,9 +62,11 @@ class L4State14(app_manager.RyuApp):
                     acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
                     if not (flow in self.ht):
                         self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                        self.ht.add(flow)
             else:
                 if (other_port, dip, sip, dport, sport) in self.ht:
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                    self.ht.add(flow)
                 else:
                     acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
         else:
