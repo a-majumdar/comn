@@ -33,8 +33,7 @@ class L2Learn14(app_manager.RyuApp):
     def _packet_in_handler(self, ev):
         msg = ev.msg
         in_port, pkt = (msg.match['in_port'], packet.Packet(msg.data))
-        for p in pkt:
-            print(p.protocol_name)
+        if pkt.get_protocol(tcp.tcp): print(True)
         print()
         dp = msg.datapath
         ofp, psr, did = (dp.ofproto, dp.ofproto_parser, format(dp.id, '016d'))
@@ -51,7 +50,7 @@ class L2Learn14(app_manager.RyuApp):
             self.add_flow(dp, 1, mtc, acts, msg.buffer_id)
             if msg.buffer_id != ofp.OFP_NO_BUFFER:
                 return
-                
+
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
                                in_port=in_port, actions=acts, data=data)

@@ -45,6 +45,36 @@ class L4Mirror14(app_manager.RyuApp):
         out_port = 2 if in_port == 1 else 1
         #
         # write your code here
+        other_port = [1, 2].remove(in_port)
+        acts = [psr.OFPActionOutput(other_port)]
+        if pkt.get_protocol(tcp.tcp) and pkt.get_protocol(ipv4.ipv4):
+            smac, dmac = (eth.src, eth.dst)
+            tproto = pkt.get_protocol(tcp.tcp)
+            nproto = pkt.get_protocol(ipv4.ipv4)
+            sip, dip = (nproto.src, nproto.dst)
+            sport, dport = (tproto.src_port, tproto.dst_port)
+            flow = (in_port, sip, dip, sport, dport)
+            match = psr.OFPMatch(in_port=in_port, ipv4_src=sip, ipv4_dst=dip, tcp_src=sport, tcp_dst=dport)
+            if in_port == 1:
+                flagged = tproto.has_flags(tcp.TCP_SYN) or tproto.has_flags(tcp.TCP_FIN) or tproto.has_flags(tcp.TCP_RST)
+                synfin = tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_FIN)
+                synrst = tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_RST)
+                if flagged and not (synfin or synrst):
+                    acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
+                    self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                    self.ht[flow] = None
+            elif in_port == 2:
+                if (other_port, dip, sip, dport, sport) in self.ht:
+                    self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                    self.ht[flow] = None
+                elif flow in self.ht:
+                    if self.ht[flow] < 10:
+                        self.ht[flow] += 1
+                    else:
+                        acts = [psr.OFPActionOutput(3)]
+                elif tproto.has_flags(tcp.TCP_SYN) and not tproto.has_flags(tcp.TCP_ACK):
+                    self.ht[flow] = 0
+
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
