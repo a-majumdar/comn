@@ -6,7 +6,6 @@ from ryu.ofproto import ofproto_v1_4
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
 from ryu.lib.packet import ether_types
-from ryu.lib.packet import tcp
 
 class L2Learn14(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_4.OFP_VERSION]
@@ -34,7 +33,7 @@ class L2Learn14(app_manager.RyuApp):
     def _packet_in_handler(self, ev):
         msg = ev.msg
         in_port, pkt = (msg.match['in_port'], packet.Packet(msg.data))
-        if pkt.get_protocol(tcp.tcp): print(True)
+        if pkt.get_protocol(ethernet.ethernet): print(True) else: print(False)
         print()
         dp = msg.datapath
         ofp, psr, did = (dp.ofproto, dp.ofproto_parser, format(dp.id, '016d'))
