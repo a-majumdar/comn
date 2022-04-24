@@ -80,6 +80,8 @@ class L4Mirror14(app_manager.RyuApp):
             match = psr.OFPMatch(in_port=in_port, ip_proto=nproto.proto, ipv4_src=sip, ipv4_dst=dip, eth_type=eth.ethertype, tcp_src=sport, tcp_dst=dport)
             if in_port == 1:
                 self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                if msg.buffer_id != ofp.OFP_NO_BUFFER:
+                    return
             elif in_port == 2:
                 acts.append(psr.OFPActionOutput(3))
                 if tproto.has_flags(tcp.TCP_SYN) and not tproto.has_flags(tcp.TCP_ACK):
@@ -88,6 +90,10 @@ class L4Mirror14(app_manager.RyuApp):
                     self.ht[flow] += 1
                     if self.ht[flow] >= 10:
                         self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                        if msg.buffer_id != ofp.OFP_NO_BUFFER:
+                            return
+                else:
+                    return
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
