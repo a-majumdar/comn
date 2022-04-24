@@ -71,8 +71,8 @@ class L4Mirror14(app_manager.RyuApp):
         #     if msg.buffer_id != ofp.OFP_NO_BUFFER:
         #         return
         acts = [psr.OFPActionOutput(out_port)]
-        tproto = tcph[0]
-        nproto = iph[0]
+        tproto = tcph[0] if len(tcph) != 0 else None
+        nproto = iph[0] if len(iph) != 0 else None
         if tcph is not None and iph is not None:
             sip, dip = (nproto.src, nproto.dst)
             sport, dport = (tproto.src_port, tproto.dst_port)
