@@ -73,7 +73,7 @@ class L4Mirror14(app_manager.RyuApp):
         acts = [psr.OFPActionOutput(out_port)]
         tproto = tcph[0] if len(tcph) != 0 else None
         nproto = iph[0] if len(iph) != 0 else None
-        if tcph is not None and iph is not None:
+        if tproto is not None and nproto is not None:
             sip, dip = (nproto.src, nproto.dst)
             sport, dport = (tproto.src_port, tproto.dst_port)
             flow = (sip, dip, sport, dport)
