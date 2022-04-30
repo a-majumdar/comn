@@ -43,7 +43,6 @@ class L4State14(app_manager.RyuApp):
         # write your code here
         pin = 1
         pout = 2
-        other_port = [1, 2].remove(in_port)
 
         iph = pkt.get_protocols(ipv4.ipv4)
         iph = iph[0] if len(iph) != 0 else None
@@ -54,6 +53,7 @@ class L4State14(app_manager.RyuApp):
 
         forwarding = False if (iph is not None and tcph is not None) else True
         if forwarding:
+            other_port = pout if in_port == pin else pin
             acts = [psr.OFPActionOutput(other_port)]
         else:
             smac, dmac = (eth.src, eth.dst)
