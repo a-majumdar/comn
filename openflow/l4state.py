@@ -54,7 +54,7 @@ class L4State14(app_manager.RyuApp):
 
         forwarding = False if (iph is not None and tcph is not None) else True
         if forwarding:
-            acts = [psr.OFPActionOutput(ofp.other_port)]
+            acts = [psr.OFPActionOutput(other_port)]
         else:
             smac, dmac = (eth.src, eth.dst)
             sip, dip = (iph.src, iph.dst)
