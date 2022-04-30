@@ -41,35 +41,39 @@ class L4State14(app_manager.RyuApp):
         eth = pkt.get_protocols(ethernet.ethernet)[0]
         #
         # write your code here
+        pin = 1
+        pout = 2
         other_port = [1, 2].remove(in_port)
-        acts = [psr.OFPActionOutput(other_port)]
-        # forwarding = True
-        if pkt.get_protocol(tcp.tcp) and pkt.get_protocol(ipv4.ipv4):
-        #     forwarding = False
-        # if not forwarding:
+
+        iph = pkt.get_protocols(ipv4.ipv4)
+        iph = iph[0] if len(iph) != 0 else None
+        tcph = pkt.get_protocols(tcp.tcp)
+        tcph = tcph[0] if len(tcph) != 0 else None
+
+        acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
+
+        if iph is not None and tcph is not None:
             smac, dmac = (eth.src, eth.dst)
-            tproto = pkt.get_protocol(tcp.tcp)
-            nproto = pkt.get_protocol(ipv4.ipv4)
-            sip, dip = (nproto.src, nproto.dst)
-            sport, dport = (tproto.src_port, tproto.dst_port)
+            sip, dip = (iph.src, iph.dst)
+            sport, dport = (tcph.src_port, tcph.dst_port)
             flow = (sip, dip, sport, dport)
-            match = psr.OFPMatch(in_port=in_port, ip_proto=nproto.proto, ipv4_src=sip, ipv4_dst=dip, eth_type=eth.ethertype, tcp_src=sport, tcp_dst=dport)
-            if in_port == 1:
+            match = psr.OFPMatch(in_port=in_port, ip_proto=iph.proto, ipv4_src=sip, ipv4_dst=dip, eth_type=eth.ethertype, tcp_src=sport, tcp_dst=dport)
+
+            if in_port == pin:
                 flagged = tproto.has_flags(tcp.TCP_SYN) or tproto.has_flags(tcp.TCP_FIN) or tproto.has_flags(tcp.TCP_RST)
                 synfin = tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_FIN)
                 synrst = tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_RST)
                 if flagged and not (synfin or synrst):
-                    if not (flow in self.ht):
-                        self.add_flow(dp, 1, match, acts, msg.buffer_id)
-                        self.ht.add(flow)
-                else:
-                    acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
-            else:
-                if (dip, sip, dport, sport) in self.ht:
+                    acts = [psr.OFPActionOutput(pout)]
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
                     self.ht.add(flow)
-                else:
-                    acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
+            else:
+                if (dip, sip, dport, sport) in self.ht:
+                    acts = [psr.OFPActionOutput(pin)]
+                    self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                    self.ht.add(flow)
+        else:
+            acts = [psr.OFPActionOutput(other_port)]
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,

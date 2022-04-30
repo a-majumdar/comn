@@ -53,16 +53,16 @@ class L4Mirror14(app_manager.RyuApp):
         # Get the TCP and IP header information
         tcp_header = tcph[0] if len(tcph) != 0 else None
         ip_header = iph[0] if len(iph) != 0 else None
-        
+
         # Define the default values for the flag
         add_flow_flag = False
-        
+
         # Create an action to the output port
         acts = [psr.OFPActionOutput(out_port)]
-        
+
         # If the packet's tcp and ip headers are not empty then
         if tcp_header is not None and ip_header is not None:
-            # If the input port is internal then 
+            # If the input port is internal then
             if in_port == INTERNAL_PORT_NUM:
                 # Set the flag to add a flow
                 add_flow_flag = True
@@ -91,7 +91,7 @@ class L4Mirror14(app_manager.RyuApp):
                     self.ht.pop(address, None)
                     # Set the flag to add a flow
                     add_flow_flag = True
-                    
+
         # If we need to add a flow then
         if add_flow_flag:
             # Create a match rule for the TCP connection
