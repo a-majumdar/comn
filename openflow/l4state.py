@@ -60,9 +60,9 @@ class L4State14(app_manager.RyuApp):
             match = psr.OFPMatch(in_port=in_port, ip_proto=iph.proto, ipv4_src=sip, ipv4_dst=dip, eth_type=eth.ethertype, tcp_src=sport, tcp_dst=dport)
 
             if in_port == pin:
-                flagged = tproto.has_flags(tcp.TCP_SYN) or tproto.has_flags(tcp.TCP_FIN) or tproto.has_flags(tcp.TCP_RST)
-                synfin = tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_FIN)
-                synrst = tproto.has_flags(tcp.TCP_SYN) and tproto.has_flags(tcp.TCP_RST)
+                flagged = tcph.has_flags(tcp.TCP_SYN) or tcp.has_flags(tcp.TCP_FIN) or tcp.has_flags(tcp.TCP_RST)
+                synfin = tcp.has_flags(tcp.TCP_SYN) and tcp.has_flags(tcp.TCP_FIN)
+                synrst = tcp.has_flags(tcp.TCP_SYN) and tcp.has_flags(tcp.TCP_RST)
                 if flagged and not (synfin or synrst):
                     acts = [psr.OFPActionOutput(pout)]
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
