@@ -50,6 +50,7 @@ class L4State14(app_manager.RyuApp):
         tcph = tcph[0] if len(tcph) != 0 else None
 
         acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
+        match = psr.OFPMatch()
 
         forwarding = False if (iph is not None and tcph is not None) else True
         if forwarding:
