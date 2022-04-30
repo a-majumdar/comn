@@ -70,11 +70,13 @@ class L4State14(app_manager.RyuApp):
                     acts = [psr.OFPActionOutput(pout)]
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
                     self.ht.add(flow)
+                    print("Problem 1")
             else:
                 if (dip, sip, dport, sport) in self.ht:
                     acts = [psr.OFPActionOutput(pin)]
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
                     self.ht.add(flow)
+                    print("Problem 2")
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
