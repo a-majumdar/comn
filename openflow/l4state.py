@@ -52,7 +52,10 @@ class L4State14(app_manager.RyuApp):
 
         acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
 
-        if iph is not None and tcph is not None:
+        forwarding = False if iph is not None and tcph is not None else True
+        if forwarding:
+            acts = [psr.OFPActionOutput(ofp.other_port)]
+        else:
             smac, dmac = (eth.src, eth.dst)
             sip, dip = (iph.src, iph.dst)
             sport, dport = (tcph.src_port, tcph.dst_port)
