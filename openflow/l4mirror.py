@@ -65,14 +65,11 @@ class L4Mirror14(app_manager.RyuApp):
                     self.ht[flow] += 1
                     if self.ht[flow] >= 10:
                         self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                        del self.ht[flow]
                         if msg.buffer_id != ofp.OFP_NO_BUFFER:
                             return
                 else:
                     return
-
-        hack = ('192.168.1.2', '192.168.1.3', 26152, 29909)
-        if hack in self.ht:
-            del self.ht[hack]
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
