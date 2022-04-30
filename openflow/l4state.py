@@ -50,7 +50,7 @@ class L4State14(app_manager.RyuApp):
         tcph = tcph[0] if len(tcph) != 0 else None
 
         acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
-        match = psr.OFPMatch()
+        add = False
 
         forwarding = False if (iph is not None and tcph is not None) else True
         if forwarding:
@@ -61,7 +61,6 @@ class L4State14(app_manager.RyuApp):
             sip, dip = (iph.src, iph.dst)
             sport, dport = (tcph.src_port, tcph.dst_port)
             flow = (sip, dip, sport, dport)
-            match = psr.OFPMatch(in_port=in_port, ip_proto=iph.proto, ipv4_src=sip, ipv4_dst=dip, eth_type=eth.ethertype, tcp_src=sport, tcp_dst=dport)
 
             if in_port == pin:
                 flagged = tcph.has_flags(tcp.TCP_SYN) or tcph.has_flags(tcp.TCP_FIN) or tcph.has_flags(tcp.TCP_RST)
@@ -69,19 +68,19 @@ class L4State14(app_manager.RyuApp):
                 synrst = tcph.has_flags(tcp.TCP_SYN) and tcph.has_flags(tcp.TCP_RST)
                 if flagged and not (synfin or synrst):
                     acts = [psr.OFPActionOutput(pout)]
-                    self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                    add = True
                     self.ht.add(flow)
-                    print("Problem 1")
             else:
                 if (dip, sip, dport, sport) in self.ht:
                     acts = [psr.OFPActionOutput(pin)]
-                    self.add_flow(dp, 1, match, acts, msg.buffer_id)
+                    add = True
                     self.ht.add(flow)
-                    print("Problem 2")
 
-        if msg.buffer_id != ofp.OFP_NO_BUFFER:
-            return
-        print("Passing if-else block")
+        if add:
+            match = psr.OFPMatch(in_port=in_port, ip_proto=iph.proto, ipv4_src=sip, ipv4_dst=dip, eth_type=eth.ethertype, tcp_src=sport, tcp_dst=dport)
+            self.add_flow(dp, 1, match, acts, msg.buffer_id)
+            if msg.buffer_id != ofp.OFP_NO_BUFFER:
+                return
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
