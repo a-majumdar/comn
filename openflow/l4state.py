@@ -52,7 +52,7 @@ class L4State14(app_manager.RyuApp):
 
         acts = [psr.OFPActionOutput(ofp.OFPPC_NO_FWD)]
 
-        forwarding = False if iph is not None and tcph is not None else True
+        forwarding = False if (iph is not None and tcph is not None) else True
         if forwarding:
             acts = [psr.OFPActionOutput(ofp.other_port)]
         else:
@@ -75,8 +75,6 @@ class L4State14(app_manager.RyuApp):
                     acts = [psr.OFPActionOutput(pin)]
                     self.add_flow(dp, 1, match, acts, msg.buffer_id)
                     self.ht.add(flow)
-        else:
-            acts = [psr.OFPActionOutput(other_port)]
         #
         data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         out = psr.OFPPacketOut(datapath=dp, buffer_id=msg.buffer_id,
